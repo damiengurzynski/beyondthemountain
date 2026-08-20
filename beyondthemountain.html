@@ -1,0 +1,120 @@
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body {
+  margin: 0;
+  font-family: monospace;
+}</style></head><body><div id="debug">debug</div>
+<canvas></canvas></body><script>//VARIABLES
+//debug
+let debug = document.getElementById('debug');
+
+//canvas
+let canvas = document.querySelector('canvas');
+let ctx = canvas.getContext('2d');
+let screenX = window.innerWidth;
+let screenY = window.innerHeight;
+
+//game
+let levels = [['town',screenX/2,screenY - screenY/5,'darkorange'],['lake',screenX/4,screenY/2,'darkblue',5,0],['forest',screenX - screenX/4,screenY/2,'darkgreen',5,0],['mountain',screenX/2,screenY/5,'darkgray'],8,0];
+let uibuttons = [['back',0,screenY/2-15],['next',screenX-30,screenY/2-15]];
+let currentlevel = levels[0];
+let currentscene = 0;
+let currentscreen = 'map';
+let currentenemies = [[null,0,0],[null,screenX/3,0],[null,screenX-screenX/3,0]];
+let currentplayers = [['flute',0,screenY-screenY/3],['drum',screenX/3,screenY-screenY/3],['guitar',screenX-screenX/3,screenY-screenY/3]];
+let combat = false;
+
+//FUNCTIONS
+function init() {canvas.width = screenX; canvas.height = screenY}
+
+function rand(min,max) {
+  let mi = Math.ceil(min);
+  return Math.floor(Math.random() * (Math.floor(max) - mi + 1) + mi);
+}
+
+function drawLevel(level) {
+  if ((currentlevel[0] == 'mountain' && level[0] != 'town') || ((currentlevel[0] == 'lake' || currentlevel[0] == 'forest') && (level[0] != 'mountain' || currentlevel[5])) || (currentlevel[0] == 'town' && level[0] != 'mountain')) {
+    currentlevel = level;
+    currentscreen = 'level';
+    
+    ctx.clearRect(0,0,screenX,screenY);
+    
+    //draw level background
+    ctx.fillStyle = level[3];
+    ctx.fillRect(0,0,screenX,screenY);
+    
+    //spawn players
+    currentplayers.forEach(e => {
+      if (e[0]) {
+        ctx.fillStyle = 'gold';
+        ctx.fillRect(e[1],e[2],screenX/3,screenY/3);
+      }
+    })
+    
+    //random enemy spawn
+    if (rand(0,3) > 0 && currentlevel[0] != 'town') {
+      combat = true;
+      for (let i = 0; i <= rand(0,2); i++) {
+        let e = currentenemies[i];
+        ctx.fillStyle = 'darkred';
+        ctx.fillRect(e[1],e[2],screenX/3,screenY/3);
+      }
+    }
+    
+    if (!combat) {
+      //back to map button
+      ctx.fillStyle = 'red';
+      ctx.fillRect(uibuttons[0][1],uibuttons[0][2],30,30);
+      
+      if (currentlevel[0] != 'town') {
+        //next level scene button
+        ctx.fillStyle = 'green';
+        ctx.fillRect(uibuttons[1][1],uibuttons[1][2],30,30);
+      }
+    }
+
+    debug.innerHTML = currentlevel[0];
+  }
+  else debug.innerHTML = 'cannot load level';
+}
+
+function drawMap() {
+  ctx.clearRect(0,0,screenX,screenY);
+  levels.forEach(e => {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(e[1],e[2],30,30);
+    //show selection
+    if (e[0] == currentlevel[0]) {ctx.fillStyle = 'red'; ctx.fillRect(e[1],e[2],10,10)};
+  });
+}
+
+//LISTENERS
+canvas.addEventListener('click', e => {
+  if (currentscreen == 'map') {
+    levels.forEach(f => {
+      if ((e.offsetX > f[1] && e.offsetX < f[1]+30) && (e.offsetY > f[2] && e.offsetY < f[2]+30)) drawLevel(f);
+    })
+  }
+
+  if (currentscreen == 'level' && !combat) {
+    uibuttons.forEach(f => {
+      if ((e.offsetX > f[1] && e.offsetX < f[1]+30) && (e.offsetY > f[2] && e.offsetY < f[2]+30)) {
+        if (f[0] == 'back') {currentscene = 0; currentscreen = 'map'; drawMap()};
+        if (f[0] == 'next' && currentlevel[0] != 'town') {
+          if (currentscene < currentlevel[4]) {currentscene++; drawLevel(currentlevel)}
+          else {currentlevel[5] = 1; currentscreen = 'map'; drawMap()};
+        }
+      }
+    })
+  }
+})
+
+
+//RUNTIME
+init();
+drawMap();
+
+
+
+
+
+
+</script></html>
