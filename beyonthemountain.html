@@ -38,6 +38,10 @@ function draw() {
   ctx.clearRect(0,0,screenX,screenY);
   
   if (currentscreen == 'map') {
+    //draw map background
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0,0,screenX,screenY);
+
     levels.forEach(e => {
       ctx.fillStyle = 'black';
       ctx.fillRect(e[1],e[2],30,30);
