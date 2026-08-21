@@ -14,94 +14,133 @@ let screenY = window.innerHeight;
 
 //game
 let levels = [['town',screenX/2,screenY - screenY/5,'darkorange'],['lake',screenX/4,screenY/2,'darkblue',5,0],['forest',screenX - screenX/4,screenY/2,'darkgreen',5,0],['mountain',screenX/2,screenY/5,'darkgray'],8,0];
-let uibuttons = [['back',0,screenY/2-15],['next',screenX-30,screenY/2-15]];
 let currentlevel = levels[0];
 let currentscene = 0;
 let currentscreen = 'map';
 let currentenemies = [[null,0,0],[null,screenX/3,0],[null,screenX-screenX/3,0]];
 let currentplayers = [['flute',0,screenY-screenY/3],['drum',screenX/3,screenY-screenY/3],['guitar',screenX-screenX/3,screenY-screenY/3]];
+let selectedplayer = currentplayers[0];
 let combat = false;
+let uibuttons = [['back',0,screenY/2],['next',screenX-30,screenY/2]];
 
 //FUNCTIONS
-function init() {canvas.width = screenX; canvas.height = screenY}
+function initCanvas() {
+  canvas.width = screenX;
+  canvas.height = screenY;
+}
 
 function rand(min,max) {
   let mi = Math.ceil(min);
   return Math.floor(Math.random() * (Math.floor(max) - mi + 1) + mi);
 }
 
-function drawLevel(level) {
-  if ((currentlevel[0] == 'mountain' && level[0] != 'town') || ((currentlevel[0] == 'lake' || currentlevel[0] == 'forest') && (level[0] != 'mountain' || currentlevel[5])) || (currentlevel[0] == 'town' && level[0] != 'mountain')) {
-    currentlevel = level;
-    currentscreen = 'level';
-    
-    ctx.clearRect(0,0,screenX,screenY);
-    
+function draw() {
+  ctx.clearRect(0,0,screenX,screenY);
+  
+  if (currentscreen == 'map') {
+    levels.forEach(e => {
+      ctx.fillStyle = 'black';
+      ctx.fillRect(e[1],e[2],30,30);
+      //show selection
+      if (e[0] == currentlevel[0]) {ctx.fillStyle = 'red'; ctx.fillRect(e[1],e[2],10,10)};
+    });
+  }
+  
+  if (currentscreen == 'level') {
     //draw level background
-    ctx.fillStyle = level[3];
+    ctx.fillStyle = currentlevel[3];
     ctx.fillRect(0,0,screenX,screenY);
     
-    //spawn players
+    //draw players
     currentplayers.forEach(e => {
       if (e[0]) {
         ctx.fillStyle = 'gold';
         ctx.fillRect(e[1],e[2],screenX/3,screenY/3);
+        ctx.fillStyle = 'white';
+        ctx.font = '20px monospace';
+        ctx.fillText(e[0],e[1],e[2]+40);
+        if (selectedplayer == e){ctx.fillStyle = 'red'; ctx.fillRect(e[1],e[2],20,20)}
       }
     })
     
-    //random enemy spawn
-    if (rand(0,3) > 0 && currentlevel[0] != 'town') {
-      combat = true;
-      for (let i = 0; i <= rand(0,2); i++) {
-        let e = currentenemies[i];
+    //draw enemies
+    currentenemies.forEach(e => {
+      if (e[0]) {
         ctx.fillStyle = 'darkred';
         ctx.fillRect(e[1],e[2],screenX/3,screenY/3);
+        ctx.fillStyle = 'white';
+        ctx.font = '20px monospace';
+        ctx.fillText('enemy',e[1],e[2]+40);
+      }
+    })
+    
+    //draw ui buttons
+    if (!combat) {
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.moveTo(uibuttons[0][1],uibuttons[0][2]);
+      ctx.lineTo(uibuttons[0][1]+30,uibuttons[0][2]-15);
+      ctx.lineTo(uibuttons[0][1]+30,uibuttons[0][2]+15);
+      ctx.closePath();
+      ctx.fill();
+      
+      if (currentlevel[0] != 'town') {
+        ctx.beginPath();
+        ctx.moveTo(uibuttons[1][1],uibuttons[1][2]-15);
+        ctx.lineTo(uibuttons[1][1],uibuttons[1][2]+15);
+        ctx.lineTo(uibuttons[1][1]+30,uibuttons[1][2]);
+        ctx.closePath();
+        ctx.fill();
       }
     }
     
-    if (!combat) {
-      //back to map button
-      ctx.fillStyle = 'red';
-      ctx.fillRect(uibuttons[0][1],uibuttons[0][2],30,30);
-      
-      if (currentlevel[0] != 'town') {
-        //next level scene button
-        ctx.fillStyle = 'green';
-        ctx.fillRect(uibuttons[1][1],uibuttons[1][2],30,30);
-      }
-    }
+    
+  }
+}
 
+function loadLevel(level) {
+  if ((currentlevel[0] == 'mountain' && level[0] != 'town') || ((currentlevel[0] == 'lake' || currentlevel[0] == 'forest') && (level[0] != 'mountain' || currentlevel[5])) || (currentlevel[0] == 'town' && level[0] != 'mountain')) {
+    currentlevel = level;
+    currentscreen = 'level';
+    
+    //spawn random num of enemies
+    if (rand(0,3) > 0 && currentlevel[0] != 'town') {
+      combat = true;
+      for (let i = 0; i <= rand(0,2); i++) {currentenemies[i][0] = 1}
+    }
+    
+    draw();
+    
     debug.innerHTML = currentlevel[0];
   }
   else debug.innerHTML = 'cannot load level';
 }
 
-function drawMap() {
-  ctx.clearRect(0,0,screenX,screenY);
-  levels.forEach(e => {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(e[1],e[2],30,30);
-    //show selection
-    if (e[0] == currentlevel[0]) {ctx.fillStyle = 'red'; ctx.fillRect(e[1],e[2],10,10)};
-  });
-}
-
 //LISTENERS
+//left click-touch
 canvas.addEventListener('click', e => {
-  if (currentscreen == 'map') {
-    levels.forEach(f => {
-      if ((e.offsetX > f[1] && e.offsetX < f[1]+30) && (e.offsetY > f[2] && e.offsetY < f[2]+30)) drawLevel(f);
-    })
-  }
-
+  //map level selection
+  if (currentscreen == 'map') {levels.forEach(f => {if ((e.offsetX > f[1] && e.offsetX < f[1]+30) && (e.offsetY > f[2] && e.offsetY < f[2]+30)) loadLevel(f)})}
+  
+  //ui buttons
   if (currentscreen == 'level' && !combat) {
     uibuttons.forEach(f => {
-      if ((e.offsetX > f[1] && e.offsetX < f[1]+30) && (e.offsetY > f[2] && e.offsetY < f[2]+30)) {
-        if (f[0] == 'back') {currentscene = 0; currentscreen = 'map'; drawMap()};
+      if ((e.offsetX > f[1] && e.offsetX < f[1]+40) && (e.offsetY > f[2]-30 && e.offsetY < f[2]+30)) {
+        if (f[0] == 'back') {currentscene = 0; currentscreen = 'map'; draw()};
         if (f[0] == 'next' && currentlevel[0] != 'town') {
-          if (currentscene < currentlevel[4]) {currentscene++; drawLevel(currentlevel)}
-          else {currentlevel[5] = 1; currentscreen = 'map'; drawMap()};
+          if (currentscene < currentlevel[4]) {currentscene++; loadLevel(currentlevel)}
+          else {currentlevel[5] = 1; currentscreen = 'map'; draw()};
         }
+      }
+    })
+  }
+  
+  //select player
+  if (currentscreen == 'level') {
+    currentplayers.forEach(f => {
+      if ((e.offsetX > f[1] && e.offsetX < f[1]+screenX/3) && (e.offsetY > f[2] && e.offsetY < f[2]+screenY/3)) {
+        selectedplayer = f;
+        draw();
       }
     })
   }
@@ -109,8 +148,8 @@ canvas.addEventListener('click', e => {
 
 
 //RUNTIME
-init();
-drawMap();
+initCanvas();
+draw();
 
 
 
