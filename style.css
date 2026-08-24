@@ -1,0 +1,96 @@
+body {
+  margin: 0;
+  font-family: monospace;
+  user-select: none;
+}
+
+#background {
+  position: absolute;
+  z-index: 0;
+}
+
+#map {
+  position: relative;
+  height: 100vh;
+  width: 100vh;
+}
+
+.mappoint {
+  position: absolute;
+  border-radius: 10px;
+  height: 30px;
+}
+
+#town {
+  bottom: 10vh;
+  left: 50vw;
+}
+
+#lake {
+  bottom: 50vh;
+  left: 20vw;
+}
+
+#forest {
+  bottom: 50vh;
+  right: 20vw;
+}
+
+#mountain {
+  top: 10vh;
+  left: 50vw;
+}
+
+#back, #next {
+  position: fixed;
+  z-index: 2;
+  top: 50vh;
+  height: 8vh;
+  width: 8vh;
+}
+
+#next {
+  right: 0;
+}
+
+#level {
+  position: relative;
+  z-index: 1;
+  display: none;
+  flex-direction: column;
+  height: 100vh;
+}
+
+#enemies, #players {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+}
+
+#middle {
+  flex-grow: 2;
+}
+
+.enemy, .player {
+  background-color: darkred;
+  border: 1px solid white;
+  color: white;
+  flex-grow: 1;
+}
+
+#attacks {
+  border: 1px solid green;
+  display: none;
+  flex-direction: column;
+  flex-grow: 2;
+}
+
+.attack {
+  flex-grow: 1;
+}
+
+#song {
+  background-color: purple;
+  color: white;
+  flex-grow: 2;
+}

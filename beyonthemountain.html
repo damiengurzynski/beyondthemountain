@@ -1,163 +1,47 @@
-<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body {
-  margin: 0;
-  font-family: monospace;
-}</style></head><body><div id="debug">debug</div>
-<canvas></canvas></body><script>//VARIABLES
-//debug
-let debug = document.getElementById('debug');
+<!DOCTYPE html>
+<html>
 
-//canvas
-let canvas = document.querySelector('canvas');
-let ctx = canvas.getContext('2d');
-let screenX = window.innerWidth;
-let screenY = window.innerHeight;
-
-//game
-let levels = [['town',screenX/2,screenY - screenY/5,'darkorange'],['lake',screenX/4,screenY/2,'darkblue',5,0],['forest',screenX - screenX/4,screenY/2,'darkgreen',5,0],['mountain',screenX/2,screenY/5,'darkgray'],8,0];
-let currentlevel = levels[0];
-let currentscene = 0;
-let currentscreen = 'map';
-let currentenemies = [[null,0,0],[null,screenX/3,0],[null,screenX-screenX/3,0]];
-let currentplayers = [['flute',0,screenY-screenY/3],['drum',screenX/3,screenY-screenY/3],['guitar',screenX-screenX/3,screenY-screenY/3]];
-let selectedplayer = currentplayers[0];
-let combat = false;
-let uibuttons = [['back',0,screenY/2],['next',screenX-30,screenY/2]];
-
-//FUNCTIONS
-function initCanvas() {
-  canvas.width = screenX;
-  canvas.height = screenY;
-}
-
-function rand(min,max) {
-  let mi = Math.ceil(min);
-  return Math.floor(Math.random() * (Math.floor(max) - mi + 1) + mi);
-}
-
-function draw() {
-  ctx.clearRect(0,0,screenX,screenY);
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
   
-  if (currentscreen == 'map') {
-    //draw map background
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0,0,screenX,screenY);
+<body>
+  <div id="debug">debug</div>
 
-    levels.forEach(e => {
-      ctx.fillStyle = 'black';
-      ctx.fillRect(e[1],e[2],30,30);
-      //show selection
-      if (e[0] == currentlevel[0]) {ctx.fillStyle = 'red'; ctx.fillRect(e[1],e[2],10,10)};
-    });
-  }
-  
-  if (currentscreen == 'level') {
-    //draw level background
-    ctx.fillStyle = currentlevel[3];
-    ctx.fillRect(0,0,screenX,screenY);
-    
-    //draw players
-    currentplayers.forEach(e => {
-      if (e[0]) {
-        ctx.fillStyle = 'gold';
-        ctx.fillRect(e[1],e[2],screenX/3,screenY/3);
-        ctx.fillStyle = 'white';
-        ctx.font = '20px monospace';
-        ctx.fillText(e[0],e[1],e[2]+40);
-        if (selectedplayer == e){ctx.fillStyle = 'red'; ctx.fillRect(e[1],e[2],20,20)}
-      }
-    })
-    
-    //draw enemies
-    currentenemies.forEach(e => {
-      if (e[0]) {
-        ctx.fillStyle = 'darkred';
-        ctx.fillRect(e[1],e[2],screenX/3,screenY/3);
-        ctx.fillStyle = 'white';
-        ctx.font = '20px monospace';
-        ctx.fillText('enemy',e[1],e[2]+40);
-      }
-    })
-    
-    //draw ui buttons
-    if (!combat) {
-      ctx.fillStyle = 'white';
-      ctx.beginPath();
-      ctx.moveTo(uibuttons[0][1],uibuttons[0][2]);
-      ctx.lineTo(uibuttons[0][1]+30,uibuttons[0][2]-15);
-      ctx.lineTo(uibuttons[0][1]+30,uibuttons[0][2]+15);
-      ctx.closePath();
-      ctx.fill();
-      
-      if (currentlevel[0] != 'town') {
-        ctx.beginPath();
-        ctx.moveTo(uibuttons[1][1],uibuttons[1][2]-15);
-        ctx.lineTo(uibuttons[1][1],uibuttons[1][2]+15);
-        ctx.lineTo(uibuttons[1][1]+30,uibuttons[1][2]);
-        ctx.closePath();
-        ctx.fill();
-      }
-    }
-    
-    
-  }
-}
+  <canvas id="background"></canvas>
 
-function loadLevel(level) {
-  if ((currentlevel[0] == 'mountain' && level[0] != 'town') || ((currentlevel[0] == 'lake' || currentlevel[0] == 'forest') && (level[0] != 'mountain' || currentlevel[5])) || (currentlevel[0] == 'town' && level[0] != 'mountain')) {
-    currentlevel = level;
-    currentscreen = 'level';
-    
-    //spawn random num of enemies
-    if (rand(0,3) > 0 && currentlevel[0] != 'town') {
-      combat = true;
-      for (let i = 0; i <= rand(0,2); i++) {currentenemies[i][0] = 1}
-    }
-    
-    draw();
-    
-    debug.innerHTML = currentlevel[0];
-  }
-  else debug.innerHTML = 'cannot load level';
-}
+  <div id="map">
+    <button class="mappoint" id="town" onclick="loadLevel(levels.town)">town</button>
+    <button class="mappoint" id="lake" onclick="loadLevel(levels.lake)">lake</button>
+    <button class="mappoint" id="forest" onclick="loadLevel(levels.forest)">forest</button>
+    <button disabled class="mappoint" id="mountain" onclick="loadLevel(levels.mountain)">mountain</button>
+  </div>
 
-//LISTENERS
-//left click-touch
-canvas.addEventListener('click', e => {
-  //map level selection
-  if (currentscreen == 'map') {levels.forEach(f => {if ((e.offsetX > f[1] && e.offsetX < f[1]+30) && (e.offsetY > f[2] && e.offsetY < f[2]+30)) loadLevel(f)})}
-  
-  //ui buttons
-  if (currentscreen == 'level' && !combat) {
-    uibuttons.forEach(f => {
-      if ((e.offsetX > f[1] && e.offsetX < f[1]+40) && (e.offsetY > f[2]-30 && e.offsetY < f[2]+30)) {
-        if (f[0] == 'back') {currentscene = 0; currentscreen = 'map'; draw()};
-        if (f[0] == 'next' && currentlevel[0] != 'town') {
-          if (currentscene < currentlevel[4]) {currentscene++; loadLevel(currentlevel)}
-          else {currentlevel[5] = 1; currentscreen = 'map'; draw()};
-        }
-      }
-    })
-  }
-  
-  //select player
-  if (currentscreen == 'level') {
-    currentplayers.forEach(f => {
-      if ((e.offsetX > f[1] && e.offsetX < f[1]+screenX/3) && (e.offsetY > f[2] && e.offsetY < f[2]+screenY/3)) {
-        selectedplayer = f;
-        draw();
-      }
-    })
-  }
-})
+  <button hidden id="back" onclick="back()"><</button>
+  <button hidden id="next" onclick="next()">></button>
 
+  <div hidden id="level">
+    <div id="enemies">
+      <div class="enemy">e1</div>
+      <div class="enemy">e2</div>
+      <div class="enemy">e3</div>
+    </div>
+    <div id="middle"></div>
+    <div id="players">
+      <div class="player">p1</div>
+      <div class="player">p2</div>
+      <div class="player">p3</div>
+      <div id="attacks">
+        <button class="attack">a1</button>
+        <button class="attack">a2</button>
+        <button class="attack">a3</button>
+      </div>
+      <div hidden id="song">song plays here</div>
+    </div>
+  </div>
+</body>
 
-//RUNTIME
-initCanvas();
-draw();
+<script src="main.js"></script>
 
-
-
-
-
-
-</script></html>
+</html>
