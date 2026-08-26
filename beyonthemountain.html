@@ -7,18 +7,16 @@
 </head>
   
 <body>
-  <div id="debug">debug</div>
-
   <canvas id="background"></canvas>
 
   <div id="map">
-    <button class="mappoint" id="town" onclick="loadLevel(levels.town)">town</button>
+    <button class="mappoint" id="town" onclick="loadScreen('town')">town</button>
     <button class="mappoint" id="lake" onclick="loadLevel(levels.lake)">lake</button>
     <button class="mappoint" id="forest" onclick="loadLevel(levels.forest)">forest</button>
     <button disabled class="mappoint" id="mountain" onclick="loadLevel(levels.mountain)">mountain</button>
   </div>
 
-  <button hidden id="back" onclick="back()"><</button>
+  <button hidden id="back" onclick="loadScreen('map')"><</button>
   <button hidden id="next" onclick="next()">></button>
 
   <div hidden id="level">
@@ -29,13 +27,14 @@
     </div>
     <div id="middle"></div>
     <div id="players">
-      <div class="player">p1</div>
-      <div class="player">p2</div>
-      <div class="player">p3</div>
+      <div onclick="selectPlayer('flute')" class="player">p1</div>
+      <div onclick="selectPlayer('drum')" class="player">p2</div>
+      <div onclick="selectPlayer('guitar')" class="player">p3</div>
       <div id="attacks">
         <button class="attack">a1</button>
         <button class="attack">a2</button>
         <button class="attack">a3</button>
+        <button onclick="exitPlayer()" class="attack"><</button>
       </div>
       <div hidden id="song">song plays here</div>
     </div>
