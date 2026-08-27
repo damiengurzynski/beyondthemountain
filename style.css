@@ -61,6 +61,12 @@ body {
   height: 100vh;
 }
 
+#playerside {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: row;
+}
+
 #enemies, #players {
   display: flex;
   flex-direction: row;
@@ -72,14 +78,13 @@ body {
 }
 
 .enemy, .player {
-  background-color: darkred;
-  border: 1px solid white;
-  color: white;
+  background-color: lightgrey;
+  border: 1px solid black;
+  color: black;
   flex-grow: 1;
 }
 
 #attacks {
-  border: 1px solid green;
   display: none;
   flex-direction: column;
   flex-grow: 2;
@@ -89,8 +94,34 @@ body {
   flex-grow: 1;
 }
 
+#piano {
+  display: none;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.pianokey {
+  flex-grow: 1;
+}
+
 #song {
-  background-color: purple;
-  color: white;
-  flex-grow: 2;
+  display: none;
+  flex-direction: row;
+  flex-grow: 6;
+  background-color: white;
+}
+
+.songcol {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.songcol:nth-child(1) {
+  background-color: lightcoral;
+}
+
+.songnote {
+  border: 1px solid grey;
+  flex-grow: 1;
 }

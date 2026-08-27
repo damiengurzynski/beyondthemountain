@@ -3,7 +3,7 @@
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
   
 <body>
@@ -20,27 +20,66 @@
   <button hidden id="next" onclick="next()">></button>
 
   <div hidden id="level">
+
     <div id="enemies">
-      <div class="enemy">e1</div>
-      <div class="enemy">e2</div>
-      <div class="enemy">e3</div>
+      <div onclick="selectEnemy('e1')" class="enemy">e1</div>
+      <div onclick="selectEnemy('e2')" class="enemy">e2</div>
+      <div onclick="selectEnemy('e3')" class="enemy">e3</div>
     </div>
+
     <div id="middle"></div>
-    <div id="players">
-      <div onclick="selectPlayer('flute')" class="player">p1</div>
-      <div onclick="selectPlayer('drum')" class="player">p2</div>
-      <div onclick="selectPlayer('guitar')" class="player">p3</div>
+
+    <div id="playerside">
+      <div id="players">
+        <div onclick="selectPlayer('flute')" class="player">p1</div>
+        <div onclick="selectPlayer('drum')" class="player">p2</div>
+        <div onclick="selectPlayer('guitar')" class="player">p3</div>
+      </div>
+    
       <div id="attacks">
-        <button class="attack">a1</button>
-        <button class="attack">a2</button>
-        <button class="attack">a3</button>
+        <button class="attack" onclick="playSong(0)">a1</button>
+        <button class="attack" onclick="playSong(1)">a2</button>
+        <button class="attack" onclick="playSong(2)">a3</button>
         <button onclick="exitPlayer()" class="attack"><</button>
       </div>
-      <div hidden id="song">song plays here</div>
+
+       <div id="piano">
+        <button class="pianokey"><</button>
+        <button class="pianokey">></button>
+        <button class="pianokey">^</button>
+        <button class="pianokey">v</button>
+      </div>
+
+      <div id="song">
+        <div class="songcol">
+          <div class="songnote"></div>
+          <div class="songnote"></div>
+          <div class="songnote"></div>
+          <div class="songnote"></div>
+        </div>
+        <div class="songcol">
+          <div class="songnote"></div>
+          <div class="songnote"></div>
+          <div class="songnote"></div>
+          <div class="songnote"></div>
+        </div>
+        <div class="songcol">
+          <div class="songnote"></div>
+          <div class="songnote"></div>
+          <div class="songnote"></div>
+          <div class="songnote"></div>
+        </div><div class="songcol">
+          <div class="songnote"></div>
+          <div class="songnote"></div>
+          <div class="songnote"></div>
+          <div class="songnote"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </body>
 
-<script src="main.js"></script>
+<script src="./main.js"></script>
 
 </html>

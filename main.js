@@ -11,13 +11,15 @@ let levels = {lake: ['darkblue',5], forest: ['darkgreen',8], mountain: ['darkgra
 let currentlevel = null;
 let levelscene = 0;
 let currentscreen = 'map';
-let enemies = {e1: 0, e2: 0, e3: 0};
-let players = {flute: 100, drum: 100, guitar: 100};
+let enemies = {e1: {hp: 0}, e2: {hp: 0}, e3: {hp: 0}};
+let currentenemy = 'e1';
+let players = {flute: {hp: 100, songs: [1,0,0]}, drum: {hp: 100, songs: [1,0,0]}, guitar: {hp: 100, songs: [1,0,0]}};
 let currentplayer = null;
 let songs = {flute: [['Slumber',[50,57,60,40]],['Love',[]],['Folly',[]]], guitar: [['Sunshine',[]],['Rain',[]],['Snow',[]]], drum: [['Envy',[]],['Anger',[]],['Ego',[]]]};
+let currentsong = null;
 let combat = false;
 let menu = null;
-let ui = {attacks: document.getElementById('attacks'), players: document.getElementById('players'), enemies: document.getElementById('enemies'), mountain: document.getElementById('mountain'), map: document.getElementById('map'), level: document.getElementById('level'), back: document.getElementById('back'), next: document.getElementById('next')};
+let ui = {piano: document.getElementById('piano'), song: document.getElementById('song'), attacks: document.getElementById('attacks'), players: document.getElementById('players'), enemies: document.getElementById('enemies'), mountain: document.getElementById('mountain'), map: document.getElementById('map'), level: document.getElementById('level'), back: document.getElementById('back'), next: document.getElementById('next')};
 
 //FUNCTIONS
 function initCanvas() {
@@ -68,29 +70,32 @@ function draw() {
     ctx.fillRect(0,0,screenX,screenY);
 
     //check combat
-    if (combat) ui.enemies.hidden = false;
+    if (combat) {
+      ui.enemies.style.display = 'flex';
+      Array.from(ui.enemies.children).forEach(e => e.style.border = '1px solid black');
+      ui.enemies.children[Object.keys(enemies).indexOf(currentenemy)].style.border = '2px solid red';
+    }
     else {
-      ui.enemies.hidden = true;
+      ui.enemies.style.display = 'none';
       ui.back.hidden = false;
       ui.next.hidden = false;
     }
 
     //check players state
     Object.entries(players).forEach((e,i) => {
-      if (e[1] == 0) document.querySelectorAll('.player')[i].hidden = true;
+      if (e[1].hp == 0) document.querySelectorAll('.player')[i].hidden = true;
       else document.querySelectorAll('.player')[i].hidden = false;
     })
 
     //check ennemies state
     Object.entries(enemies).forEach((e,i) => {
-      if (e[1] == 0) document.querySelectorAll('.enemy')[i].hidden = true;
+      if (e[1].hp == 0) document.querySelectorAll('.enemy')[i].hidden = true;
       else document.querySelectorAll('.enemy')[i].hidden = false;
     })
 
     //check menus
     if (menu == 'attacks') {
       let p = Object.keys(players).indexOf(currentplayer);
-      console.log(p);
       for (let i = 0; i < 3; i++) {
         if (i != p) ui.players.children[i].hidden = true
       }
@@ -101,6 +106,17 @@ function draw() {
       ui.players.children[2].hidden = false;
       ui.attacks.style.display = 'none';
     }
+
+    if (menu == 'song') {
+      ui.players.style.display = 'none';
+      ui.piano.style.display = 'flex';
+      ui.song.style.display = 'flex';
+    }
+    else {
+      ui.players.style.display = 'flex';
+      ui.piano.style.display = 'none';
+      ui.song.style.display = 'none';
+    }
   }
 }
 
@@ -109,7 +125,7 @@ function loadLevel(level) {
   currentscreen = 'level';
   
   //clear old enemies values
-  Object.keys(enemies).forEach(k => {enemies[k] = 0});
+  Object.keys(enemies).forEach(k => {enemies[k].hp = 0});
 
   //spawn random num of enemies
   if (rand(0,3) > 0) {
@@ -117,17 +133,17 @@ function loadLevel(level) {
     const k = Object.keys(enemies);
     const r = rand(0,2);
     for (let i = 0; i < 3; i++) {
-      if (i <= r) enemies[k[i]] = 100;
-      else enemies[k[i]] = 0;
+      if (i <= r) enemies[k[i]].hp = 100;
+      else enemies[k[i]].hp = 0;
     }
   }
   else combat = false;
-  console.log(enemies);
   draw();
 }
 
 function loadScreen(scr) {
   levelscene = 0;
+  menu = null;
   currentscreen = scr;
   draw();
 }
@@ -161,12 +177,18 @@ function exitPlayer() {
   draw();
 }
 
-//LISTENERS
-//left click-touch
-canvas.addEventListener('click', e => {
+function selectEnemy(e) {
+  if (menu != 'song') {
+    currentenemy = e;
+    draw();
+  }
+}
 
-})
-
+function playSong(s) {
+  menu = 'song';
+  console.log(currentplayer);
+  draw();
+}
 
 //RUNTIME
 initCanvas();
