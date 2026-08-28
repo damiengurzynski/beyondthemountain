@@ -13,13 +13,16 @@ let levelscene = 0;
 let currentscreen = 'map';
 let enemies = {e1: {hp: 0}, e2: {hp: 0}, e3: {hp: 0}};
 let currentenemy = 'e1';
-let players = {flute: {hp: 100, songs: [1,0,0]}, drum: {hp: 100, songs: [1,0,0]}, guitar: {hp: 100, songs: [1,0,0]}};
+let players = {flute: {hp: 100, songs: [1,0,0]}, drum: {hp: 100, songs: [1,1,0]}, guitar: {hp: 100, songs: [1,1,1]}};
 let currentplayer = null;
-let songs = {flute: [['Slumber',[50,57,60,40]],['Love',[]],['Folly',[]]], guitar: [['Sunshine',[]],['Rain',[]],['Snow',[]]], drum: [['Envy',[]],['Anger',[]],['Ego',[]]]};
+let songs = {flute: [['Slumber',[50,0,80,40,0,27,54,0,10,23,80,0,0,7,0,40]],['Love',[]],['Folly',[]]], guitar: [['Sunshine',[]],['Rain',[]],['Snow',[]]], drum: [['Envy',[]],['Anger',[]],['Ego',[]]]};
 let currentsong = null;
+let currentnote = null;
+let currentsheet = [[],[],[],[]];
+let playloop = null;
 let combat = false;
 let menu = null;
-let ui = {piano: document.getElementById('piano'), song: document.getElementById('song'), attacks: document.getElementById('attacks'), players: document.getElementById('players'), enemies: document.getElementById('enemies'), mountain: document.getElementById('mountain'), map: document.getElementById('map'), level: document.getElementById('level'), back: document.getElementById('back'), next: document.getElementById('next')};
+let ui = {sheet: document.querySelectorAll('.songcol'), piano: document.getElementById('piano'), song: document.getElementById('song'), attacks: document.getElementById('attacks'), players: document.getElementById('players'), enemies: document.getElementById('enemies'), mountain: document.getElementById('mountain'), map: document.getElementById('map'), level: document.getElementById('level'), back: document.getElementById('back'), next: document.getElementById('next')};
 
 //FUNCTIONS
 function initCanvas() {
@@ -100,6 +103,12 @@ function draw() {
         if (i != p) ui.players.children[i].hidden = true
       }
       ui.attacks.style.display = 'flex';
+      players[currentplayer].songs.forEach((e,i) => {
+        if (e) {
+          ui.attacks.children[i].innerHTML = songs[currentplayer][i][0];
+          ui.attacks.children[i].disabled = false;
+        }
+      });
     }
     else {
       ui.players.children[1].hidden = false;
@@ -111,6 +120,13 @@ function draw() {
       ui.players.style.display = 'none';
       ui.piano.style.display = 'flex';
       ui.song.style.display = 'flex';
+
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+          if (currentsheet[i][j]) ui.sheet[j].children[i].innerHTML = '♩';
+          else ui.sheet[j].children[i].innerHTML = '&#8193';
+        }
+      }
     }
     else {
       ui.players.style.display = 'flex';
@@ -174,6 +190,12 @@ function selectPlayer(p) {
 function exitPlayer() {
   currentplayer = null;
   menu = null;
+  ui.attacks.children[0] = 'empty';
+  ui.attacks.children[1] = 'empty';
+  ui.attacks.children[2] = 'empty';
+  ui.attacks.children[0].disabled = true;
+  ui.attacks.children[1].disabled = true;
+  ui.attacks.children[2].disabled = true;
   draw();
 }
 
@@ -184,10 +206,39 @@ function selectEnemy(e) {
   }
 }
 
-function playSong(s) {
+function loadSong(s) {
   menu = 'song';
-  console.log(currentplayer);
+  currentsong = songs[currentplayer][s];
+  currentsong[1].forEach(e => {
+    const row = Array(currentsheet.length).fill(0);
+    if (e !== 0) {
+      let r = rand(0,3);
+      row[r] = e;
+    }
+    currentsheet.forEach((f,j) => f.push(row[j]));
+  })
+
   draw();
+
+  playloop = setInterval(() => {
+    if (currentsheet[0].length < 1) {
+      clearInterval(playloop);
+      currentsheet = [[],[],[],[]];
+      console.log('end of song');
+      menu = null;
+      draw();
+    }
+    else {
+      currentsheet.forEach(e => e.shift());
+      draw();
+    }
+  },500)
+}
+
+function playKey(k) {
+  if (currentsheet[k]?.[0] !== 0) {
+    console.log('GOOD');
+  }
 }
 
 //RUNTIME

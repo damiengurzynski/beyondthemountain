@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="./style.css">
 </head>
   
@@ -37,17 +37,17 @@
       </div>
     
       <div id="attacks">
-        <button class="attack" onclick="playSong(0)">a1</button>
-        <button class="attack" onclick="playSong(1)">a2</button>
-        <button class="attack" onclick="playSong(2)">a3</button>
+        <button disabled class="attack" onclick="loadSong(0)">empty</button>
+        <button disabled class="attack" onclick="loadSong(1)">empty</button>
+        <button disabled class="attack" onclick="loadSong(2)">empty</button>
         <button onclick="exitPlayer()" class="attack"><</button>
       </div>
 
        <div id="piano">
-        <button class="pianokey"><</button>
-        <button class="pianokey">></button>
-        <button class="pianokey">^</button>
-        <button class="pianokey">v</button>
+        <button onclick="playKey(0)" class="pianokey"><</button>
+        <button onclick="playKey(1)" class="pianokey">></button>
+        <button onclick="playKey(2)" class="pianokey">^</button>
+        <button onclick="playKey(3)" class="pianokey">v</button>
       </div>
 
       <div id="song">
