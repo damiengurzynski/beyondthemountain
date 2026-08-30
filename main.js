@@ -12,7 +12,7 @@ let currentlevel = null;
 let levelscene = 0;
 let currentscreen = 'map';
 
-let enemies = {e1: {hp: 0}, e2: {hp: 0}, e3: {hp: 0}};
+let enemies = {e1: {hp: 0, sleep: false, mad: false}, e2: {hp: 0, sleep: false, mad: false}, e3: {hp: 0,  sleep: false, mad: false}};
 let currentenemy = 'e1';
 let players = {flute: {hp: 100, songs: [1,1,1]}, drum: {hp: 100, songs: [1,1,0]}, guitar: {hp: 100, songs: [1,1,1]}};
 let currentplayer = null;
@@ -32,6 +32,10 @@ const instruments = {flute: [0.8,0.9,0.99,0.6], drum: [0.02,0.2,0.99,0.2], guita
 let notehits = 0;
 let targethits = 0;
 
+let targetplayer = null;
+let enemyhit = false;
+let playerhit = false;
+let turntimer = 0;
 let combat = false;
 let menu = null;
 let ui = {sheet: document.querySelectorAll('.songcol'), piano: document.getElementById('piano'), song: document.getElementById('song'), attacks: document.getElementById('attacks'), players: document.getElementById('players'), enemies: document.getElementById('enemies'), mountain: document.getElementById('mountain'), map: document.getElementById('map'), level: document.getElementById('level'), back: document.getElementById('back'), next: document.getElementById('next')};
@@ -75,7 +79,7 @@ function draw() {
   
   if (currentscreen == 'map') {
     //draw map background
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = 'orange';
     ctx.fillRect(0,0,screenX,screenY);
     ui.back.hidden = true;
     ui.next.hidden = true;
@@ -114,16 +118,37 @@ function draw() {
       ui.next.hidden = false;
     }
 
+    //show damage
+    if (playerhit) {
+      ui.players.children[Object.keys(players).indexOf(targetplayer)].style.backgroundColor = 'red';
+      setTimeout(() => {ui.players.children[Object.keys(players).indexOf(targetplayer)].style.backgroundColor = 'lightgrey'},2000);
+      playerhit = false;
+    }
+
+    if (enemyhit) {
+      ui.enemies.children[Object.keys(enemies).indexOf(currentenemy)].style.backgroundColor = 'red';
+      setTimeout(() => {
+        ui.enemies.children[Object.keys(enemies).indexOf(currentenemy)].style.backgroundColor = 'lightgrey';
+      },2000);
+      enemyhit = false;
+    }
+
     //check players state
     Object.entries(players).forEach((e,i) => {
-      if (e[1].hp == 0) document.querySelectorAll('.player')[i].hidden = true;
-      else document.querySelectorAll('.player')[i].hidden = false;
+      if (e[1].hp < 1) document.querySelectorAll('.player')[i].hidden = true;
+      else {
+        document.querySelectorAll('.player')[i].hidden = false;
+        document.querySelectorAll('.player')[i].innerHTML = e[1].hp;
+      }
     })
 
     //check ennemies state
     Object.entries(enemies).forEach((e,i) => {
-      if (e[1].hp == 0) document.querySelectorAll('.enemy')[i].hidden = true;
-      else document.querySelectorAll('.enemy')[i].hidden = false;
+      if (e[1].hp < 1) document.querySelectorAll('.enemy')[i].hidden = true;
+      else {
+        document.querySelectorAll('.enemy')[i].hidden = false;
+        document.querySelectorAll('.enemy')[i].innerHTML = e[1].hp;
+      }
     })
 
     //check menus
@@ -237,9 +262,109 @@ function selectEnemy(e) {
   }
 }
 
+function playerAttack() {
+  let completion = Math.round((notehits/targethits)*100);
+
+  if (currentsong[0] === 'Slumber' && completion > 50) {
+    //enemies[currentenemy].sleep = true;
+
+    if (completion > 80) {
+      enemies[currentenemy].hp -= 35;
+      //turntimer = 2;
+    }
+    else {
+      enemies[currentenemy].hp -= 15;
+      //turntimer = 1;
+    }
+
+    enemyhit = true;
+
+    console.log('Dealing damage to enemy:', currentenemy);
+  }
+
+  targethits = 0;
+  notehits = 0;
+
+  draw();
+
+  setTimeout(() => {
+    // Enemy died
+    if (enemies[currentenemy].hp <= 0) {
+      currentenemy = 'e1';
+    }
+
+    // All players/enemies died
+    if (!checkStates()) {
+      return;
+    }
+
+    draw();
+    enemyAttack();
+
+  }, 2000);
+}
+
+function checkStates() {
+  let pl = 0;
+  let el = 0;
+
+  const livingEnemy = Object.entries(enemies).find(([key, enemy]) => enemy.hp > 0);
+
+  if (livingEnemy) currentenemy = livingEnemy[0];
+
+  Object.values(players).forEach(p => {
+    if (p.hp > 0) pl++;
+  });
+
+  Object.values(enemies).forEach(e => {
+    if (e.hp > 0) el++;
+  });
+
+  if (el === 0) {
+    menu = null;
+    currentlevel = null;
+    levelscene = 0;
+    currentscreen = 'map';
+    return false;
+  }
+
+  if (pl === 0) {
+    console.log('gameover');
+    return false;
+  }
+
+  draw();
+  return true;
+}
+
+function enemyAttack() {
+  const re = rand(0,2);
+  const rp = rand(0,2);
+  let e = Object.entries(enemies)[re][1];
+  let p = Object.entries(players)[rp][1];
+  targetplayer = Object.entries(players)[rp][0];
+
+  if (checkStates()) {
+    if (e.hp > 0 && e.sleep == false) {
+      if (p.hp > 0) {
+        let rh = rand(0,4)
+        if (rh > 1) {
+          p.hp -= 15;
+          playerhit = true;
+          console.log('Dealing damage to player: ' + currentplayer);
+        }
+        else console.log('Enemy has missed');
+      }
+    }
+    else enemyAttack();
+  }
+  draw();
+}
+
 function loadSong(s) {
-  menu = 'song';
   currentsong = songs[currentplayer][s];
+  menu = 'song';
+
   currentsong[1].forEach(e => {
     const row = Array(currentsheet.length).fill(0);
     if (e !== 0) {
@@ -257,11 +382,7 @@ function loadSong(s) {
     if (currentsheet[0].length < 2) {
       clearInterval(playloop);
       currentsheet = [[],[],[],[]];
-      console.log('end of song');
-      let completion = Math.round((notehits/targethits)*100);
-      console.log(completion);
-      targethits = 0;
-      notehits = 0;
+      playerAttack();
       menu = null;
       draw();
     }
