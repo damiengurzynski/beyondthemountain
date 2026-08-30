@@ -11,15 +11,27 @@ let levels = {lake: ['darkblue',5], forest: ['darkgreen',8], mountain: ['darkgra
 let currentlevel = null;
 let levelscene = 0;
 let currentscreen = 'map';
+
 let enemies = {e1: {hp: 0}, e2: {hp: 0}, e3: {hp: 0}};
 let currentenemy = 'e1';
-let players = {flute: {hp: 100, songs: [1,0,0]}, drum: {hp: 100, songs: [1,1,0]}, guitar: {hp: 100, songs: [1,1,1]}};
+let players = {flute: {hp: 100, songs: [1,1,1]}, drum: {hp: 100, songs: [1,1,0]}, guitar: {hp: 100, songs: [1,1,1]}};
 let currentplayer = null;
-let songs = {flute: [['Slumber',[50,0,80,40,0,27,54,0,10,23,80,0,0,7,0,40]],['Love',[]],['Folly',[]]], guitar: [['Sunshine',[]],['Rain',[]],['Snow',[]]], drum: [['Envy',[]],['Anger',[]],['Ego',[]]]};
+
+let songs = {flute: [['Slumber',[0,0,0,0,98,110,98,110,130.81,164.81,220,0,164.81,0,130.81,164.81,196,0,164.81,0,130.81,164.81,174.61,0,164.81,130.81]],['Love',[0,0,0,0,110,138.595,164.815,207.655,246.945,0,220,246.945,0,220,207.655,138.595,0,123.47,146.835,185,220,277.185,0,246.945,277.185,246.945,0,207.655,220]],['Folly',[0,0,0,0,207.65,196,155.56,130.81,155.56,130.81,146.83,130.81,155.56,130.81,207.65,130.81,233.08,146.83,207.65,146.83,174.61,146.83,196,174.61,155.56,130.81]]], guitar: [['Sunshine',[]],['Rain',[]],['Snow',[]]], drum: [['Envy',[]],['Anger',[]],['Ego',[]]]};
 let currentsong = null;
 let currentnote = null;
 let currentsheet = [[],[],[],[]];
 let playloop = null;
+let a_ctx = new AudioContext();
+const master = a_ctx.createGain();
+const dry = a_ctx.createGain();
+const wet = a_ctx.createGain();
+const delay = a_ctx.createDelay(1.0);
+const feedback = a_ctx.createGain();
+const instruments = {flute: [0.8,0.9,0.99,0.6], drum: [0.02,0.2,0.99,0.2], guitar: [0.02, 0.35, 0.98, 0.5]};
+let notehits = 0;
+let targethits = 0;
+
 let combat = false;
 let menu = null;
 let ui = {sheet: document.querySelectorAll('.songcol'), piano: document.getElementById('piano'), song: document.getElementById('song'), attacks: document.getElementById('attacks'), players: document.getElementById('players'), enemies: document.getElementById('enemies'), mountain: document.getElementById('mountain'), map: document.getElementById('map'), level: document.getElementById('level'), back: document.getElementById('back'), next: document.getElementById('next')};
@@ -28,6 +40,24 @@ let ui = {sheet: document.querySelectorAll('.songcol'), piano: document.getEleme
 function initCanvas() {
   canvas.width = screenX;
   canvas.height = screenY;
+}
+
+function initAudio() {
+  dry.gain.value = 0.85;
+  wet.gain.value = 0.10;
+
+  delay.delayTime.value = 0.25;
+  feedback.gain.value = 0.25;
+
+  delay.connect(feedback);
+  feedback.connect(delay);
+
+  dry.connect(master);
+  delay.connect(wet);
+  wet.connect(master);
+
+  master.gain.value = 1;
+  master.connect(a_ctx.destination);
 }
 
 function rand(min,max) {
@@ -120,6 +150,7 @@ function draw() {
       ui.players.style.display = 'none';
       ui.piano.style.display = 'flex';
       ui.song.style.display = 'flex';
+      Array.from(ui.sheet[0].children).forEach(e => e.style.backgroundColor = 'red');
 
       for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
@@ -144,7 +175,7 @@ function loadLevel(level) {
   Object.keys(enemies).forEach(k => {enemies[k].hp = 0});
 
   //spawn random num of enemies
-  if (rand(0,3) > 0) {
+  if (rand(0,4) > 0) {
     combat = true;
     const k = Object.keys(enemies);
     const r = rand(0,2);
@@ -214,33 +245,98 @@ function loadSong(s) {
     if (e !== 0) {
       let r = rand(0,3);
       row[r] = e;
+      targethits++;
     }
     currentsheet.forEach((f,j) => f.push(row[j]));
   })
 
   draw();
 
+  let note = 0;
   playloop = setInterval(() => {
-    if (currentsheet[0].length < 1) {
+    if (currentsheet[0].length < 2) {
       clearInterval(playloop);
       currentsheet = [[],[],[],[]];
       console.log('end of song');
+      let completion = Math.round((notehits/targethits)*100);
+      console.log(completion);
+      targethits = 0;
+      notehits = 0;
       menu = null;
       draw();
     }
     else {
-      currentsheet.forEach(e => e.shift());
+      playNote(instruments[currentplayer],currentsong[1][note]);
+      if (note > 0) currentsheet.forEach(e => e.shift());
       draw();
+      note++;
     }
   },500)
 }
 
 function playKey(k) {
   if (currentsheet[k]?.[0] !== 0) {
-    console.log('GOOD');
+    notehits++;
+    Array.from(ui.sheet[0].children)[k].style.backgroundColor = 'green';
   }
 }
 
+function playNote(inst, note) {
+    if (note === 0) return;
+
+    const node = a_ctx.createGain();
+    node.connect(dry);
+    node.connect(delay);
+
+    const now = a_ctx.currentTime;
+
+    const o1 = a_ctx.createOscillator();
+    const g1 = a_ctx.createGain();
+
+    o1.type = "sine";
+    o1.frequency.value = note;
+    g1.gain.value = 0.55;
+
+    const o2 = a_ctx.createOscillator();
+    const g2 = a_ctx.createGain();
+
+    o2.type = "sine";
+    o2.frequency.value = note * 2;
+    g2.gain.value = 0.30;
+
+    o1.connect(g1);
+    o2.connect(g2);
+
+    g1.connect(node);
+    g2.connect(node);
+
+    const duration = inst[3];
+
+    node.gain.setValueAtTime(0, now);
+    node.gain.linearRampToValueAtTime(1, now + duration * inst[0]);
+    node.gain.setValueAtTime(1, now + duration * inst[1]);
+    node.gain.linearRampToValueAtTime(0, now + duration * inst[2]);
+
+    o1.start(now);
+    o2.start(now);
+
+    o1.stop(now + duration);
+    o2.stop(now + duration);
+}
+
+
+
+//LISTENERS
+document.addEventListener('keydown', e => {
+  if (menu == 'song') {
+    if (e.key == 'ArrowLeft') playKey(0);
+    if (e.key == 'ArrowRight') playKey(1);
+    if (e.key == 'ArrowUp') playKey(2);
+    if (e.key == 'ArrowDown') playKey(3);
+  }
+})
+
 //RUNTIME
 initCanvas();
+initAudio();
 draw();
