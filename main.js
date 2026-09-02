@@ -320,9 +320,6 @@ function checkStates() {
 }
 
 function playerAttack() {
-  enemies[currentenemy].hp = 0;
-
-
   let completion = Math.round((notehits/targethits)*100);
 
   if (currentsong[0] === 'Slumber' && completion > 50) {
