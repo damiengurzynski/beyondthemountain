@@ -7,12 +7,12 @@ let screenX = window.innerWidth;
 let screenY = window.innerHeight;
 
 //game
-let levels = {lake: ['darkblue',5], forest: ['darkgreen',8], mountain: ['darkgray',1]};
+let levels = {lake: ['darkblue',4,30], forest: ['darkgreen',1,15], mountain: ['darkgray',6,40]};
 let currentlevel = null;
 let levelscene = 0;
 let currentscreen = 'map';
 
-let enemies = {e1: {hp: 0, sleep: false, mad: false}, e2: {hp: 0, sleep: false, mad: false}, e3: {hp: 0,  sleep: false, mad: false}};
+let enemies = {e1: {hp: 0, sleep: [false,0], mad: [false,0], weak: [false,0]}, e2: {hp: 0, sleep: [false,0], mad: [false,0], weak: [false,0]}, e3: {hp: 0,  sleep: [false,0], mad: [false,0], weak: [false,0]}};
 let currentenemy = 'e1';
 let players = {flute: {hp: 100, songs: [1,1,1]}, drum: {hp: 100, songs: [1,1,0]}, guitar: {hp: 100, songs: [1,1,1]}};
 let currentplayer = null;
@@ -38,9 +38,10 @@ let playerhit = false;
 let turntimer = 0;
 let combat = false;
 let menu = null;
-let ui = {sheet: document.querySelectorAll('.songcol'), piano: document.getElementById('piano'), song: document.getElementById('song'), attacks: document.getElementById('attacks'), players: document.getElementById('players'), enemies: document.getElementById('enemies'), mountain: document.getElementById('mountain'), map: document.getElementById('map'), level: document.getElementById('level'), back: document.getElementById('back'), next: document.getElementById('next')};
+let ui = {middle: document.getElementById('middle'), sheet: document.querySelectorAll('.songcol'), piano: document.getElementById('piano'), song: document.getElementById('song'), attacks: document.getElementById('attacks'), players: document.getElementById('players'), enemies: document.getElementById('enemies'), mountain: document.getElementById('mountain'), map: document.getElementById('map'), level: document.getElementById('level'), back: document.getElementById('back'), next: document.getElementById('next')};
 
 //FUNCTIONS
+//initializing
 function initCanvas() {
   canvas.width = screenX;
   canvas.height = screenY;
@@ -69,6 +70,8 @@ function rand(min,max) {
   return Math.floor(Math.random() * (Math.floor(max) - mi + 1) + mi);
 }
 
+
+//canvas - UI
 function loadImage(img)
 {
   //take img code and converts it to canvas image
@@ -149,6 +152,10 @@ function draw() {
         document.querySelectorAll('.enemy')[i].hidden = false;
         document.querySelectorAll('.enemy')[i].innerHTML = e[1].hp;
       }
+      if (e[1].sleep[0]) document.querySelectorAll('.enemy')[i].style.backgroundColor = 'blue';
+      else if (e[1].mad[0]) document.querySelectorAll('.enemy')[i].style.backgroundColor = 'violet';
+      else if (e[1].weak[0]) document.querySelectorAll('.enemy')[i].style.backgroundColor = 'lightgreen';
+      else document.querySelectorAll('.enemy')[i].style.backgroundColor = 'lightgrey';
     })
 
     //check menus
@@ -192,12 +199,22 @@ function draw() {
   }
 }
 
+function notify(t) {
+  ui.middle.innerHTML = t;
+  setTimeout(() => ui.middle.innerHTML = '', 2000);
+}
+
+//game
 function loadLevel(level) {
   currentlevel = level;
   currentscreen = 'level';
   
   //clear old enemies values
   Object.keys(enemies).forEach(k => {enemies[k].hp = 0});
+  Object.keys(enemies).forEach(k => {enemies[k].sleep = [false,0]});
+  Object.keys(enemies).forEach(k => {enemies[k].mad = [false,0]});
+  Object.keys(enemies).forEach(k => {enemies[k].weak = [false,0]});
+
 
   //spawn random num of enemies
   if (rand(0,4) > 0) {
@@ -210,6 +227,10 @@ function loadLevel(level) {
     }
   }
   else combat = false;
+
+  //adapt enemy strength
+  console.log();
+
   draw();
 }
 
@@ -220,11 +241,11 @@ function loadScreen(scr) {
   draw();
 }
 
+//level
 function next() {
-  if (levelscene < currentlevel[1]) {
+  if (levelscene < currentlevel[1] - 1) {
     levelscene++;
     loadLevel(currentlevel);
-    
   }
   else {
     ui.mountain.disabled = false;
@@ -262,48 +283,6 @@ function selectEnemy(e) {
   }
 }
 
-function playerAttack() {
-  let completion = Math.round((notehits/targethits)*100);
-
-  if (currentsong[0] === 'Slumber' && completion > 50) {
-    //enemies[currentenemy].sleep = true;
-
-    if (completion > 80) {
-      enemies[currentenemy].hp -= 35;
-      //turntimer = 2;
-    }
-    else {
-      enemies[currentenemy].hp -= 15;
-      //turntimer = 1;
-    }
-
-    enemyhit = true;
-
-    console.log('Dealing damage to enemy:', currentenemy);
-  }
-
-  targethits = 0;
-  notehits = 0;
-
-  draw();
-
-  setTimeout(() => {
-    // Enemy died
-    if (enemies[currentenemy].hp <= 0) {
-      currentenemy = 'e1';
-    }
-
-    // All players/enemies died
-    if (!checkStates()) {
-      return;
-    }
-
-    draw();
-    enemyAttack();
-
-  }, 2000);
-}
-
 function checkStates() {
   let pl = 0;
   let el = 0;
@@ -318,13 +297,16 @@ function checkStates() {
 
   Object.values(enemies).forEach(e => {
     if (e.hp > 0) el++;
+    if (e.sleep[1] == 0) e.sleep[0] = false;
+    else (e.sleep[1]--);
+    if (e.mad[1] == 0) e.mad[0] = false;
+    else (e.mad[1]--);
+    if (e.weak[1] == 0) e.weak[0] = false;
+    else (e.weak[1]--);
   });
 
   if (el === 0) {
-    menu = null;
-    currentlevel = null;
-    levelscene = 0;
-    currentscreen = 'map';
+    next();
     return false;
   }
 
@@ -337,30 +319,108 @@ function checkStates() {
   return true;
 }
 
-function enemyAttack() {
-  const re = rand(0,2);
-  const rp = rand(0,2);
-  let e = Object.entries(enemies)[re][1];
-  let p = Object.entries(players)[rp][1];
-  targetplayer = Object.entries(players)[rp][0];
+function playerAttack() {
+  enemies[currentenemy].hp = 0;
 
-  if (checkStates()) {
-    if (e.hp > 0 && e.sleep == false) {
-      if (p.hp > 0) {
-        let rh = rand(0,4)
-        if (rh > 1) {
-          p.hp -= 15;
-          playerhit = true;
-          console.log('Dealing damage to player: ' + currentplayer);
-        }
-        else console.log('Enemy has missed');
-      }
-    }
-    else enemyAttack();
+
+  let completion = Math.round((notehits/targethits)*100);
+
+  if (currentsong[0] === 'Slumber' && completion > 50) {
+    enemies[currentenemy].sleep[0] = true;
+    if (completion > 80) enemies[currentenemy].sleep[1] = 2;
+    if (completion == 100) enemies[currentenemy].sleep[1] = 4;
+    else enemies[currentenemy].sleep[1] = 1;
+    notify('Enemy falls asleep for ' + enemies[currentenemy].sleep[1] + ' turns');
   }
+
+  else if (currentsong[0] === 'Love' && completion > 50) {
+    if (completion > 80) {
+      Object.keys(players).forEach(k => {players[k].hp += 15});
+      notify('All players gain 15 HP');
+    }
+    if (completion == 100) {
+      players[currentplayer].hp += 35;
+      notify('Player ' + currentplayer + 'gains 35 HP');
+    }
+    else {
+      players[currentplayer].hp += 15;
+      notify('Player ' + currentplayer + 'gains 15 HP');
+    }
+  }
+
+  else if (currentsong[0] === 'Folly' && completion > 50) {
+    enemies[currentenemy].mad[0] = true;
+    if (completion > 80) enemies[currentenemy].mad[1] = 2;
+    if (completion == 100) enemies[currentenemy].mad[1] = 4;
+    else enemies[currentenemy].mad[1] = 1;
+    enemyhit = true;
+    notify('Enemy goes mad for ' + enemies[currentenemy].mad[1] + ' turns');
+  }
+
+  else notify('Song has failed');
+
+  targethits = 0;
+  notehits = 0;
+
+  draw();
+
+  setTimeout(() => {
+    // Enemy died
+    if (enemies[currentenemy].hp <= 0) currentenemy = 'e1';
+    // All players/enemies died
+    if (!checkStates()) return;
+
+    draw();
+    enemyAttack();
+  }, 2000);
+}
+
+function enemyAttack() {
+  //if (!checkStates()) return;
+  const strength = currentlevel[2];
+
+  const availableEnemies = Object.entries(enemies)
+    .filter(([key, enemy]) =>
+      enemy.hp > 0 &&
+      enemy.sleep[0] == false
+    );
+
+  // No enemy can attack
+  if (availableEnemies.length == 0) return;
+
+  // Random living/awake enemy
+  const [enemyKey, e] = availableEnemies[rand(0, availableEnemies.length - 1)];
+
+  // Random living player
+  const availablePlayers = Object.entries(players)
+    .filter(([key, player]) => player.hp > 0);
+
+  if (availablePlayers.length === 0) return;
+
+  const [playerKey, p] = availablePlayers[rand(0, availablePlayers.length - 1)];
+
+  targetplayer = playerKey;
+
+  const rh = rand(0,4);
+
+  if (rh > 0) {
+    if (e.mad[0]) {
+      let re = availableEnemies[rand(0, availableEnemies.length - 1)];
+      re[1].hp -= strength;
+      notify('Mad enemy strikes ' + re[0]);
+    }
+    else {
+      p.hp -= strength;
+      playerhit = true;
+      notify('Player ' + playerKey + ' takes damage');
+    }
+  }
+  else notify('Enemy has missed');
+
   draw();
 }
 
+//song playing
 function loadSong(s) {
   currentsong = songs[currentplayer][s];
   menu = 'song';
