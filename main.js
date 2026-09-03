@@ -7,17 +7,31 @@ let screenX = window.innerWidth;
 let screenY = window.innerHeight;
 
 //game
-let levels = {lake: ['darkblue',4,30], forest: ['darkgreen',1,15], mountain: ['darkgray',6,40]};
+let levels = {lake: ['darkblue',4,30], forest: ['darkgreen',6,15], mountain: ['darkgray',1,40]};
 let currentlevel = null;
 let levelscene = 0;
 let currentscreen = 'map';
 
 let enemies = {e1: {hp: 0, sleep: [false,0], mad: [false,0], weak: [false,0]}, e2: {hp: 0, sleep: [false,0], mad: [false,0], weak: [false,0]}, e3: {hp: 0,  sleep: [false,0], mad: [false,0], weak: [false,0]}};
 let currentenemy = 'e1';
-let players = {flute: {hp: 100, songs: [1,1,1]}, drum: {hp: 100, songs: [1,1,0]}, guitar: {hp: 100, songs: [1,1,1]}};
+let players = {flute: {hp: 80, songs: [1,1,1]}, drum: {hp: 150, songs: [1,1,1]}, guitar: {hp: 100, songs: [1,1,1]}};
 let currentplayer = null;
 
-let songs = {flute: [['Slumber',[0,0,0,0,98,110,98,110,130.81,164.81,220,0,164.81,0,130.81,164.81,196,0,164.81,0,130.81,164.81,174.61,0,164.81,130.81]],['Love',[0,0,0,0,110,138.595,164.815,207.655,246.945,0,220,246.945,0,220,207.655,138.595,0,123.47,146.835,185,220,277.185,0,246.945,277.185,246.945,0,207.655,220]],['Folly',[0,0,0,0,207.65,196,155.56,130.81,155.56,130.81,146.83,130.81,155.56,130.81,207.65,130.81,233.08,146.83,207.65,146.83,174.61,146.83,196,174.61,155.56,130.81]]], guitar: [['Sunshine',[]],['Rain',[]],['Snow',[]]], drum: [['Envy',[]],['Anger',[]],['Ego',[]]]};
+let songs = {flute: [
+  ['Slumber',[0,0,0,0,98,110,98,110,130.81,164.81,220,0,164.81,0,130.81,164.81,196,0,164.81,0,130.81,164.81,174.61,0,164.81,130.81]],
+  ['Love',[0,0,0,0,110,138.595,164.815,207.655,246.945,0,220,246.945,0,220,207.655,138.595,0,123.47,146.835,185,220,277.185,0,246.945,277.185,246.945,0,207.655,220]],
+  ['Folly',[0,0,0,0,207.65,196,155.56,130.81,155.56,130.81,146.83,130.81,155.56,130.81,207.65,130.81,233.08,146.83,207.65,146.83,174.61,146.83,196,174.61,155.56,130.81]]
+], 
+guitar: [
+  ['Sunshine',[]],
+  ['Rain',[]],
+  ['Snow',[0,0,0,0,138.59,174.61,207.65,110.00,138.59,164.81,92.50,116.54,123.47,110.00,138.59,155.56,123.47,155.56,233.08,138.59,174.61,261.63,110.00,138.59,207.65,92.50,116.54,174.61]]
+],
+drum: [
+  ['Envy',[0,0,0,0,50,0,50,50,0,80,0,50,0,50,50,0,80,0]],
+  ['Anger',[]],
+  ['Ego',[]]
+]};
 let currentsong = null;
 let currentnote = null;
 let currentsheet = [[],[],[],[]];
@@ -32,6 +46,7 @@ const instruments = {flute: [0.8,0.9,0.99,0.6], drum: [0.02,0.2,0.99,0.2], guita
 let notehits = 0;
 let targethits = 0;
 
+let taunt = [false,0];
 let targetplayer = null;
 let enemyhit = false;
 let playerhit = false;
@@ -109,7 +124,7 @@ function draw() {
     ctx.fillStyle = currentlevel[0];
     ctx.fillRect(0,0,screenX,screenY);
 
-    //check combat
+    //combat screen
     if (combat) {
       ui.enemies.style.display = 'flex';
       Array.from(ui.enemies.children).forEach(e => e.style.border = '1px solid black');
@@ -138,31 +153,33 @@ function draw() {
 
     //check players state
     Object.entries(players).forEach((e,i) => {
-      if (e[1].hp < 1) document.querySelectorAll('.player')[i].hidden = true;
+      const pe = ui.players.children[i];
+      if (e[1].hp < 1) pe.hidden = true;
       else {
-        document.querySelectorAll('.player')[i].hidden = false;
-        document.querySelectorAll('.player')[i].innerHTML = e[1].hp;
+        pe.hidden = false;
+        pe.innerHTML = e[1].hp;
       }
     })
 
     //check ennemies state
     Object.entries(enemies).forEach((e,i) => {
-      if (e[1].hp < 1) document.querySelectorAll('.enemy')[i].hidden = true;
+      const ee = ui.enemies.children[i];
+      if (e[1].hp < 1) ee.hidden = true;
       else {
-        document.querySelectorAll('.enemy')[i].hidden = false;
-        document.querySelectorAll('.enemy')[i].innerHTML = e[1].hp;
+        ee.hidden = false;
+        ee.innerHTML = e[1].hp;
       }
-      if (e[1].sleep[0]) document.querySelectorAll('.enemy')[i].style.backgroundColor = 'blue';
-      else if (e[1].mad[0]) document.querySelectorAll('.enemy')[i].style.backgroundColor = 'violet';
-      else if (e[1].weak[0]) document.querySelectorAll('.enemy')[i].style.backgroundColor = 'lightgreen';
-      else document.querySelectorAll('.enemy')[i].style.backgroundColor = 'lightgrey';
+      if (e[1].sleep[0]) ee.style.backgroundColor = 'blue';
+      else if (e[1].mad[0]) ee.style.backgroundColor = 'violet';
+      else if (e[1].weak[0]) ee.style.backgroundColor = 'lightgreen';
+      else ee.style.backgroundColor = 'lightgrey';
     })
 
-    //check menus
+    //display menus
     if (menu == 'attacks') {
       let p = Object.keys(players).indexOf(currentplayer);
       for (let i = 0; i < 3; i++) {
-        if (i != p) ui.players.children[i].hidden = true
+        if (i != p) ui.players.children[i].hidden = true;
       }
       ui.attacks.style.display = 'flex';
       players[currentplayer].songs.forEach((e,i) => {
@@ -170,12 +187,15 @@ function draw() {
           ui.attacks.children[i].innerHTML = songs[currentplayer][i][0];
           ui.attacks.children[i].disabled = false;
         }
+        else ui.attacks.children[i].innerHTML = 'empty';
       });
     }
     else {
-      ui.players.children[1].hidden = false;
-      ui.players.children[2].hidden = false;
       ui.attacks.style.display = 'none';
+
+      Object.entries(players).forEach(([key, player], i) => {
+        ui.players.children[i].hidden = player.hp < 1;
+      });
     }
 
     if (menu == 'song') {
@@ -214,7 +234,7 @@ function loadLevel(level) {
   Object.keys(enemies).forEach(k => {enemies[k].sleep = [false,0]});
   Object.keys(enemies).forEach(k => {enemies[k].mad = [false,0]});
   Object.keys(enemies).forEach(k => {enemies[k].weak = [false,0]});
-
+  taunt = [false,0];
 
   //spawn random num of enemies
   if (rand(0,4) > 0) {
@@ -227,9 +247,6 @@ function loadLevel(level) {
     }
   }
   else combat = false;
-
-  //adapt enemy strength
-  console.log();
 
   draw();
 }
@@ -244,17 +261,23 @@ function loadScreen(scr) {
 //level
 function next() {
   if (levelscene < currentlevel[1] - 1) {
-    levelscene++;
-    loadLevel(currentlevel);
+    notify('Going forward');
+    setTimeout(() => {
+      levelscene++;
+      loadLevel(currentlevel);
+    },2000)
   }
   else {
-    ui.mountain.disabled = false;
-    currentscreen = 'map';
-    draw();
-    ui.back.hidden = true;
-    ui.next.hidden = true;
-    ui.level.style.display = 'none';
-    ui.map.style.display = 'block';
+    notify('Level cleared');
+    setTimeout(() => {
+      ui.mountain.disabled = false;
+      currentscreen = 'map';
+      draw();
+      ui.back.hidden = true;
+      ui.next.hidden = true;
+      ui.level.style.display = 'none';
+      ui.map.style.display = 'block';
+    },2000)
   }
 }
 
@@ -284,19 +307,16 @@ function selectEnemy(e) {
 }
 
 function checkStates() {
-  let pl = 0;
-  let el = 0;
-
+  //check players/enemies left
   const livingEnemy = Object.entries(enemies).find(([key, enemy]) => enemy.hp > 0);
-
+  const livingPlayer = Object.entries(players).find(([key, player]) => player.hp > 0);
+  
+  //default to player/enemy[0] select
   if (livingEnemy) currentenemy = livingEnemy[0];
+  if (livingPlayer) currentplayer = livingPlayer[0];
 
-  Object.values(players).forEach(p => {
-    if (p.hp > 0) pl++;
-  });
-
+  //check effects timers
   Object.values(enemies).forEach(e => {
-    if (e.hp > 0) el++;
     if (e.sleep[1] == 0) e.sleep[0] = false;
     else (e.sleep[1]--);
     if (e.mad[1] == 0) e.mad[0] = false;
@@ -304,56 +324,64 @@ function checkStates() {
     if (e.weak[1] == 0) e.weak[0] = false;
     else (e.weak[1]--);
   });
+  if (taunt[1] == 0 || players.drum.hp < 1) taunt[0] = false;
+  else (taunt[1]--);
 
-  if (el === 0) {
-    next();
-    return false;
-  }
-
-  if (pl === 0) {
-    console.log('gameover');
-    return false;
-  }
+  //conditional next step
+  if (!livingEnemy) {notify('Battle won !'); next(); return false};
+  if (!livingPlayer) {notify('Game Over'); setTimeout(() => window.location.reload(), 2000)};
 
   draw();
   return true;
 }
 
+//deal damages/effects to players/enemies
 function playerAttack() {
   let completion = Math.round((notehits/targethits)*100);
+  let ce = enemies[currentenemy];
+  let cp = players[currentplayer];
+  let cs = currentsong[0];
 
-  if (currentsong[0] === 'Slumber' && completion > 50) {
-    enemies[currentenemy].sleep[0] = true;
-    if (completion > 80) enemies[currentenemy].sleep[1] = 2;
-    if (completion == 100) enemies[currentenemy].sleep[1] = 4;
-    else enemies[currentenemy].sleep[1] = 1;
-    notify('Enemy falls asleep for ' + enemies[currentenemy].sleep[1] + ' turns');
-  }
-
-  else if (currentsong[0] === 'Love' && completion > 50) {
-    if (completion > 80) {
-      Object.keys(players).forEach(k => {players[k].hp += 15});
-      notify('All players gain 15 HP');
+  if (completion > 50) {
+    if (cs == 'Slumber') {
+      ce.sleep[0] = true;
+      if (completion > 80 && completion < 100) ce.sleep[1] = 2;
+      else if (completion == 100) ce.sleep[1] = 4;
+      else ce.sleep[1] = 1;
+      notify('Enemy falls asleep for ' + ce.sleep[1] + ' turns');
     }
-    if (completion == 100) {
-      players[currentplayer].hp += 35;
-      notify('Player ' + currentplayer + 'gains 35 HP');
+
+    else if (cs == 'Love') {
+      if (completion > 80  && completion < 100) {
+        cp.hp += 25;
+        notify('Player ' + currentplayer + ' gains 25 HP');
+      }
+      else if (completion == 100) {
+        Object.keys(players).forEach(k => {players[k].hp += 15});
+        notify('All players gain 15 HP');
+      }
+      else {
+        cp.hp += 15;
+        notify('Player ' + currentplayer + ' gains 15 HP');
+      }
     }
-    else {
-      players[currentplayer].hp += 15;
-      notify('Player ' + currentplayer + 'gains 15 HP');
+
+    else if (cs == 'Folly') {
+      ce.mad[0] = true;
+      if (completion > 80  && completion < 100) ce.mad[1] = 2;
+      else if (completion == 100) ce.mad[1] = 4;
+      else ce.mad[1] = 1;
+      notify('Enemy goes mad for ' + ce.mad[1] + ' turns');
+    }
+
+    else if (cs == 'Envy') {
+      taunt[0] = true;
+      if (completion > 80  && completion < 100) taunt[1] = 2;
+      else if (completion == 100) taunt[1] = 4;
+      else taunt[1] = 1;
+      notify('Drum taunts enemies for ' + taunt[1] + ' turns');
     }
   }
-
-  else if (currentsong[0] === 'Folly' && completion > 50) {
-    enemies[currentenemy].mad[0] = true;
-    if (completion > 80) enemies[currentenemy].mad[1] = 2;
-    if (completion == 100) enemies[currentenemy].mad[1] = 4;
-    else enemies[currentenemy].mad[1] = 1;
-    enemyhit = true;
-    notify('Enemy goes mad for ' + enemies[currentenemy].mad[1] + ' turns');
-  }
-
   else notify('Song has failed');
 
   targethits = 0;
@@ -363,17 +391,13 @@ function playerAttack() {
 
   setTimeout(() => {
     // Enemy died
-    if (enemies[currentenemy].hp <= 0) currentenemy = 'e1';
-    // All players/enemies died
-    if (!checkStates()) return;
+    if (ce.hp <= 0) currentenemy = 'e1';
 
-    draw();
-    enemyAttack();
+    if (checkStates()) enemyAttack();
   }, 2000);
 }
 
 function enemyAttack() {
-  //if (!checkStates()) return;
   const strength = currentlevel[2];
 
   const availableEnemies = Object.entries(enemies)
@@ -394,8 +418,15 @@ function enemyAttack() {
 
   if (availablePlayers.length === 0) return;
 
-  const [playerKey, p] = availablePlayers[rand(0, availablePlayers.length - 1)];
-
+  let playerKey;
+  let p;
+  if (taunt[0]) {
+    playerKey = 'drum';
+    p = players.drum;
+    console.log('lol');
+  }
+  else {[playerKey, p] = availablePlayers[rand(0, availablePlayers.length - 1)]};
+  
   targetplayer = playerKey;
 
   const rh = rand(0,4);
@@ -415,6 +446,10 @@ function enemyAttack() {
   else notify('Enemy has missed');
 
   draw();
+
+  setTimeout(() => {
+    checkStates();
+  }, 2000);
 }
 
 //song playing
