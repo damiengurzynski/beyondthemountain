@@ -14,8 +14,9 @@ let currentscreen = 'map';
 
 let enemies = {e1: {hp: 0, sleep: [false,0], mad: [false,0], weak: [false,0]}, e2: {hp: 0, sleep: [false,0], mad: [false,0], weak: [false,0]}, e3: {hp: 0,  sleep: [false,0], mad: [false,0], weak: [false,0]}};
 let currentenemy = 'e1';
-let players = {flute: {hp: 80, songs: [1,1,1]}, drum: {hp: 150, songs: [1,1,1]}, guitar: {hp: 100, songs: [1,1,1]}};
+let players = {flute: {hp: 80, songs: [1,1,0]}, drum: {hp: 150, songs: [1,1,0]}, guitar: {hp: 100, songs: [1,1,0]}};
 let currentplayer = null;
+let turn = 'player';
 
 let songs = {flute: [
   ['Slumber',[0,0,0,0,98,110,98,110,130.81,164.81,220,0,164.81,0,130.81,164.81,196,0,164.81,0,130.81,164.81,174.61,0,164.81,130.81]],
@@ -127,7 +128,7 @@ function draw() {
     //combat screen
     if (combat) {
       ui.enemies.style.display = 'flex';
-      Array.from(ui.enemies.children).forEach(e => e.style.border = '1px solid black');
+      Array.from(ui.enemies.children).forEach(e => e.style.border = '2px solid black');
       ui.enemies.children[Object.keys(enemies).indexOf(currentenemy)].style.border = '2px solid red';
     }
     else {
@@ -138,15 +139,15 @@ function draw() {
 
     //show damage
     if (playerhit) {
-      ui.players.children[Object.keys(players).indexOf(targetplayer)].style.backgroundColor = 'red';
-      setTimeout(() => {ui.players.children[Object.keys(players).indexOf(targetplayer)].style.backgroundColor = 'lightgrey'},2000);
+      ui.players.children[Object.keys(players).indexOf(targetplayer)].style.backgroundColor = 'darkred';
+      setTimeout(() => {ui.players.children[Object.keys(players).indexOf(targetplayer)].style.backgroundColor = 'grey'},2000);
       playerhit = false;
     }
 
     if (enemyhit) {
-      ui.enemies.children[Object.keys(enemies).indexOf(currentenemy)].style.backgroundColor = 'red';
+      ui.enemies.children[Object.keys(enemies).indexOf(currentenemy)].style.backgroundColor = 'darkred';
       setTimeout(() => {
-        ui.enemies.children[Object.keys(enemies).indexOf(currentenemy)].style.backgroundColor = 'lightgrey';
+        ui.enemies.children[Object.keys(enemies).indexOf(currentenemy)].style.backgroundColor = 'grey';
       },2000);
       enemyhit = false;
     }
@@ -172,7 +173,7 @@ function draw() {
       if (e[1].sleep[0]) ee.style.backgroundColor = 'blue';
       else if (e[1].mad[0]) ee.style.backgroundColor = 'violet';
       else if (e[1].weak[0]) ee.style.backgroundColor = 'lightgreen';
-      else ee.style.backgroundColor = 'lightgrey';
+      else {ee.style.backgroundColor = 'grey'; ee.style.borderStyle = 'outset'};
     })
 
     //display menus
@@ -202,11 +203,11 @@ function draw() {
       ui.players.style.display = 'none';
       ui.piano.style.display = 'flex';
       ui.song.style.display = 'flex';
-      Array.from(ui.sheet[0].children).forEach(e => e.style.backgroundColor = 'red');
+      Array.from(ui.sheet[0].children).forEach(e => e.style.backgroundColor = 'darkred');
 
       for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
-          if (currentsheet[i][j]) ui.sheet[j].children[i].innerHTML = '♩';
+          if (currentsheet[i][j]) ui.sheet[j].children[i].innerHTML = '◆';
           else ui.sheet[j].children[i].innerHTML = '&#8193';
         }
       }
@@ -236,7 +237,12 @@ function loadLevel(level) {
   Object.keys(enemies).forEach(k => {enemies[k].weak = [false,0]});
   taunt = [false,0];
 
-  //spawn random num of enemies
+  //spawn random num of enemies unless lvl Mountain
+  if (currentlevel === levels.mountain) {
+    combat = true;
+    enemies.e1.hp = 300;
+  }
+  else {
   if (rand(0,4) > 0) {
     combat = true;
     const k = Object.keys(enemies);
@@ -247,6 +253,7 @@ function loadLevel(level) {
     }
   }
   else combat = false;
+}
 
   draw();
 }
@@ -315,17 +322,19 @@ function checkStates() {
   if (livingEnemy) currentenemy = livingEnemy[0];
   if (livingPlayer) currentplayer = livingPlayer[0];
 
-  //check effects timers
-  Object.values(enemies).forEach(e => {
-    if (e.sleep[1] == 0) e.sleep[0] = false;
-    else (e.sleep[1]--);
-    if (e.mad[1] == 0) e.mad[0] = false;
-    else (e.mad[1]--);
-    if (e.weak[1] == 0) e.weak[0] = false;
-    else (e.weak[1]--);
-  });
-  if (taunt[1] == 0 || players.drum.hp < 1) taunt[0] = false;
-  else (taunt[1]--);
+  if (turn == 'enemy') {
+    //check effects timers
+    Object.values(enemies).forEach(e => {
+      if (e.sleep[1] == 0) e.sleep[0] = false;
+      else (e.sleep[1]--);
+      if (e.mad[1] == 0) e.mad[0] = false;
+      else (e.mad[1]--);
+      if (e.weak[1] == 0) e.weak[0] = false;
+      else (e.weak[1]--);
+    });
+    if (taunt[1] == 0 || players.drum.hp < 1) taunt[0] = false;
+    else (taunt[1]--);
+  }
 
   //conditional next step
   if (!livingEnemy) {notify('Battle won !'); next(); return false};
@@ -337,6 +346,7 @@ function checkStates() {
 
 //deal damages/effects to players/enemies
 function playerAttack() {
+  turn = 'player';
   let completion = Math.round((notehits/targethits)*100);
   let ce = enemies[currentenemy];
   let cp = players[currentplayer];
@@ -398,6 +408,7 @@ function playerAttack() {
 }
 
 function enemyAttack() {
+  turn = 'enemy';
   const strength = currentlevel[2];
 
   const availableEnemies = Object.entries(enemies)
@@ -490,7 +501,7 @@ function loadSong(s) {
 function playKey(k) {
   if (currentsheet[k]?.[0] !== 0) {
     notehits++;
-    Array.from(ui.sheet[0].children)[k].style.backgroundColor = 'green';
+    Array.from(ui.sheet[0].children)[k].style.backgroundColor = 'red';
   }
 }
 
@@ -542,11 +553,12 @@ function playNote(inst, note) {
 //LISTENERS
 document.addEventListener('keydown', e => {
   if (menu == 'song') {
-    if (e.key == 'ArrowLeft') playKey(0);
-    if (e.key == 'ArrowRight') playKey(1);
-    if (e.key == 'ArrowUp') playKey(2);
-    if (e.key == 'ArrowDown') playKey(3);
+    if (e.key == 'ArrowUp') {playKey(0), piano.children[0].disabled = true};
+    if (e.key == 'ArrowDown') {playKey(1), piano.children[1].disabled = true};
+    if (e.key == 'ArrowLeft') {playKey(2), piano.children[2].disabled = true};
+    if (e.key == 'ArrowRight') {playKey(3), piano.children[3].disabled = true};
   }
+  setTimeout(() => {Array.from(piano.children).forEach(e => e.disabled = false)},1000)
 })
 
 //RUNTIME
