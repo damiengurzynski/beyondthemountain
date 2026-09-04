@@ -14,7 +14,7 @@ let currentscreen = 'map';
 
 let enemies = {e1: {hp: 0, sleep: [false,0], mad: [false,0], weak: [false,0]}, e2: {hp: 0, sleep: [false,0], mad: [false,0], weak: [false,0]}, e3: {hp: 0,  sleep: [false,0], mad: [false,0], weak: [false,0]}};
 let currentenemy = 'e1';
-let players = {flute: {hp: 80, songs: [1,1,0]}, drum: {hp: 150, songs: [1,1,0]}, guitar: {hp: 100, songs: [1,1,0]}};
+let players = {flute: {hp: 80, songs: [1,1,1]}, drum: {hp: 150, songs: [1,1,1]}, guitar: {hp: 100, songs: [1,1,1]}};
 let currentplayer = null;
 let turn = 'player';
 
@@ -24,14 +24,14 @@ let songs = {flute: [
   ['Folly',[0,0,0,0,207.65,196,155.56,130.81,155.56,130.81,146.83,130.81,155.56,130.81,207.65,130.81,233.08,146.83,207.65,146.83,174.61,146.83,196,174.61,155.56,130.81]]
 ], 
 guitar: [
-  ['Sunshine',[]],
-  ['Rain',[]],
-  ['Snow',[0,0,0,0,138.59,174.61,207.65,110.00,138.59,164.81,92.50,116.54,123.47,110.00,138.59,155.56,123.47,155.56,233.08,138.59,174.61,261.63,110.00,138.59,207.65,92.50,116.54,174.61]]
+  ['Spring',[0,0,0,0,138.59,174.61,207.65]],
+  ['Summer',[0,0,0,0,138.59,174.61,207.65]],
+  ['Winter',[0,0,0,0,138.59,174.61,207.65,110.00,138.59,164.81,92.50,116.54,123.47,110.00,138.59,155.56,123.47,155.56,233.08,138.59,174.61,261.63,110.00,138.59,207.65,92.50,116.54,174.61]]
 ],
 drum: [
   ['Envy',[0,0,0,0,50,0,50,50,0,80,0,50,0,50,50,0,80,0]],
-  ['Anger',[]],
-  ['Ego',[]]
+  ['Anger',[0,0,0,0,50,0,50,50,0,80,0,50,0,50,50,0,80,0]],
+  ['Ego',[0,0,0,0,50,0,50,50,0,80,0,50,0,50,50,0,80,0]]
 ]};
 let currentsong = null;
 let currentnote = null;
@@ -391,6 +391,86 @@ function playerAttack() {
       else taunt[1] = 1;
       notify('Drum taunts enemies for ' + taunt[1] + ' turns');
     }
+
+    else if (cs == 'Anger') {
+      if (completion > 80  && completion < 100) {
+        Object.keys(enemies).forEach(k => {enemies[k].hp -= 10});
+        notify('All enemies loose 10 HP');
+      }
+      else if (completion == 100) {
+        Object.keys(enemies).forEach(k => {enemies[k].hp -= 15});
+        notify('All enemies loose 15 HP');
+      }
+      else {
+        Object.keys(enemies).forEach(k => {enemies[k].hp -= 5});
+        notify('All enemies loose 5 HP');
+      }
+    }
+
+    else if (cs == 'Ego') {
+      if (completion > 80  && completion < 100) {
+        ce.hp -= 30;
+        players.drum.hp -= 30;
+        notify('Enemy & Drum loose 30 HP');
+      }
+      else if (completion == 100) {
+        ce.hp -= 40;
+        players.drum.hp -= 40;
+        notify('Enemy & Drum loose 40 HP');
+      }
+      else {
+        ce.hp -= 20;
+        players.drum.hp -= 20;
+        notify('Enemy & Drum loose 20 HP');
+      }
+      enemyhit = true;
+      playerhit = true;
+    }
+
+    else if (cs == 'Spring') {
+      if (completion > 80  && completion < 100) {
+        ce.hp -= 15;
+        notify('Enemy looses 15 HP');
+      }
+      else if (completion == 100) {
+        ce.hp -= 25;
+        notify('Enemy looses 25 HP');
+      }
+      else {
+        ce.hp -= 10;
+        notify('Enemy looses 10 HP');
+      }
+      enemyhit = true;
+    }
+
+    else if (cs == 'Summer') {
+      let ce2 = Object.entries(enemies).findLast(([key, enemy]) => enemy.hp > 0)[1];
+
+      if (completion > 80  && completion < 100) {
+        ce.hp -= 15;
+        ce2.hp -= 10;
+        notify('Enemy looses 15 HP, ricochet hits 10 HP');
+      }
+      else if (completion == 100) {
+        ce.hp -= 25;
+        ce2.hp -= 15;
+        notify('Enemy looses 25 HP, ricochet hits 15 HP');
+      }
+      else {
+        ce.hp -= 10;
+        ce2.hp -= 5;
+        notify('Enemy looses 10 HP, ricochet hits 5 HP');
+      }
+      enemyhit = true;
+    }
+
+    else if (cs == 'Winter') {
+      ce.weak[0] = true;
+      if (completion > 80  && completion < 100) ce.weak[1] = 2;
+      else if (completion == 100) ce.weak[1] = 4;
+      else ce.weak[1] = 1;
+      notify('Enemy gets weak for ' + ce.weak[1] + ' turns');
+    }
   }
   else notify('Song has failed');
 
@@ -434,7 +514,6 @@ function enemyAttack() {
   if (taunt[0]) {
     playerKey = 'drum';
     p = players.drum;
-    console.log('lol');
   }
   else {[playerKey, p] = availablePlayers[rand(0, availablePlayers.length - 1)]};
   
@@ -449,9 +528,16 @@ function enemyAttack() {
       notify('Mad enemy strikes ' + re[0]);
     }
     else {
-      p.hp -= strength;
+      console.log(strength);
+      if (e.weak[0]) {
+        p.hp -= strength / 2;
+       notify('Player ' + playerKey + ' looses ' + (strength / 2) + ' HP');
+      }
+      else {
+        p.hp -= strength;
+        notify('Player ' + playerKey + ' looses ' + strength + ' HP');
+      }
       playerhit = true;
-      notify('Player ' + playerKey + ' takes damage');
     }
   }
   else notify('Enemy has missed');
