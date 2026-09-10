@@ -2,14 +2,22 @@ body {
   margin: 0;
   user-select: none;
   touch-action: none;
+  font-family: serif;
 }
 
 #background {
   position: absolute;
+  height: 100vh;
+  width: 100vw;
   z-index: 0;
+  background-color: orange;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 #map {
+  display: none;
   position: relative;
   height: 100vh;
   width: 100vw;
@@ -19,7 +27,7 @@ button {
   border-style: outset;
   border-width: 5px;
   background-color: grey;
-  font-family: cursive;
+  font-family: serif;
   color: black;
   text-shadow: 1px 1px lightgray;
   line-height: 0;
@@ -97,16 +105,16 @@ button:disabled {
 #enemies, #players {
   display: flex;
   flex-direction: row;
-  flex-grow: 1;
+  flex: 1;
   gap: 40px;
 }
 
 #middle {
-  flex-grow: 2;
+  flex: 2;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: cursive;
+  font-family: serif;
   color: white;
   font-size: large;
 }
@@ -117,16 +125,19 @@ button:disabled {
   border-style: outset;
   border-radius: 10px;
   color: black;
-  font-family: cursive;
+  font-family: serif;
   text-shadow: 1px 1px lightgray;
-  flex-grow: 1;
+  flex: 1;
   padding: 5px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 #attacks {
   display: none;
   flex-direction: column;
-  flex-grow: 2;
+  flex: 2;
 }
 
 .attack {

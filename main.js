@@ -1,20 +1,34 @@
 //VARIABLES
 
 //canvas
-let canvas = document.querySelector('canvas');
-let ctx = canvas.getContext('2d');
 let screenX = window.innerWidth;
 let screenY = window.innerHeight;
 
+let img_intro = '';
+let img_map = '';
+let img_town = '';
+let img_lake = '';
+let img_forest = '';
+let img_mountain = '';
+let img_end = '';
+
+let img_flute = '';
+let img_drum = '';
+let img_guitar = '|000000:3j,2i,-7,0,-7,0,-6,2,-7,7,-6,7,-6,9,-4,6,-2,6,-2,6,-2,8,-1,7,-1,8,0,9,0,9,0,6,1,9,2,9,2,7,5,6,6,4,8,4,8,2,8,1,6,0,8,0,7,-1,8,-5,8,-5,7,-6,8,-7,8,-a,3,-6,6,-a,3,-8,2,-9,0,-a,0,-9,-1,-7,-3,-7,-4,-7,-5,-6,-6,-6,-8,-4,-8,-4,-6,-3,-6,-2,-6,-2,-7,-2,-6,0,-7,0,-6,4,-7,8,-4,6,-5,8,-4,9,-3,7,-3,a,-2,a,-1,6,-1,6,-1,c,0,6,0,b,0,a,2,7,3,7,4,8,5,7,7,1,9,0,a,-1,a,-3,9,-3,7,-3,7,-5,7,-5,9,-8,9,-a,7,-9,6,-8,3,-6,2,-7,0,-8,0,-9,-2,-9,-4,-9,-5,-9,-6,-9,-6,-7,-6,-5,-6,-4,-8,-3,-6,-2,-6,-2,-6,-2,-6,0,-8,0,-7,2,-6,2,-6,2,-4,6,-4,6,-2,6,-4,6,-3,6,-2,6,-2,6,-2,6,-1,8,-1,7,-2,6,1,6|000000:2q,3g,0,7,0,7,0,7,0,7,0,8,6,4,4,-6,4,-9,3,-6,0,-7,-1,-6,-6,-7,-6,-2,-4,7,-2,7,-1,6,-1,6,0,6,0,8,6,4,5,-6,4,-8,3,-6,1,-6,-1,-7,-4,-6,-6,-6|000000:4c,3f,0,6,0,7,0,6,0,7,1,7,1,6,6,0,4,-6,1,-6,3,-6,-1,-6,-3,-8,-5,-6,-6,3,-3,8,-2,7,-1,7,-1,6,1,6,6,3,7,0,6,-3,3,-6,0,-6,1,-8,0,-6,-3,-6,-6,-1|000000:3f,8o,-7,0,-c,0,-8,0,-6,2,-a,6,-b,c,-5,a,-3,9,1,7,7,7,8,3,8,0,8,-1,8,-2,9,-4,6,-3,8,-5,a,-7,8,-7,4,-6,0,-8,-5,-7,-8,-4,-7,-2,-8,-2,-7,0,-6,0,-8,2,-8,5,-9,6,-8,a,-6,8,-5,8,-4,9,-2,8,0,6,b,4,6,2,6,1,7,1,7,0,7,0,7,-1,6,-3,a,-6,6,-4,9,-8,7,-7,5,-7,2,-9,0,-9,-1,-7,-4,-7,-7,-6,-9,-1,-6,0,-a,0,-a,3,-8,4,-8,6,-8,a,-4,7,-4,6,-7,8,-2,8,-1,8,-1,9,0,6,8,2,9,0,a,1,9,0,9,-5,9,-8,8,-8,8,-7,8,-8,7,-8,5,-7,3,-6,-4,-8,-3,-6|000000:3z,8o,8,-6,9,-8,a,-6,8,-6,8,-5,7,-5,8,-5,8,-5,8,-5,7,-5,7,-5,7,-6|000000:47,8w,8,-5,8,-5,7,-4,8,-5,7,-4,6,-4,8,-4,6,-3,7,-5,6,-4,6,-5,6,-5,6,-6,4,-7,-5,-6,-4,-6,-3,-6,6,-4,7,-3,7,-3,6,-3,7,4,4,6,-2,6,-8,8,-6,4,-6,3,3,6,-1,-6|000000:4g,6d,-7,0,-9,0,-7,0,-8,0,-8,0,-8,3,-6,1,-8,3,-7,4,-6,3,-6,4,-7,5,-8,7,-7,5,-6,5,-4,6,-5,6,-5,6,-5,6,-5,6,-5,8,-3,6,-2,9,-1,7,0,6,2,6,3,6,7,7,7,5,6,2,8,1,7,0,8,-1,6,-2,5,-8,0,-7,1,6,0,7|000000:4g,6c,6,0,6,6,5,6,4,6,4,6,6,5,6,4,6,2|000000:6c,7k,6,6,4,7,-1,6,-6,2,-6,2,-6,0,-7,0,-7,-4,-5,-6,-2,-6,-6,-1,-4,7,-3,6,6,5,-5,-6,-6,-6,-1,6,6,5,6,3,6,0,6,1,6,1,7,1,6,1,7,0,7,-1,2,-6,0,-6,-6,-5|000000:20,9t,8,4,8,-1,6,-1,3,-8,1,-6,-5,-8,-4,8,2,6,7,1|000000:2v,9k|000000:2v,9k,-6,-3,-8,-4,-7,-1,-6,0,-6,1,-6,3,-6,4,-5,-6,0,-6,0,-8,0,-7,1,-6,1,-7,1,-6,5,-7,4,-6,6,-7,6,-6|000000:28,7j,0,9,0,8,0,9,0,6,0,6,0,7|000000:4i,78,0,8,0,7,0,6,0,6,0,6|000000:4h,7k,6,4,7,5|000000:2e,am,0,6,0,6,0,6,0,7,-1,8,-1,6,0,7,-1,6,-2,8,-2,9,-3,9,-2,6,-3,7,-1,6|000000:4i,8w,-1,c,0,8,0,a,0,c,0,d,0,d,0,d,0,d,0,b,0,9,0,8,1,8,1,7,2,8,2,8,2,7,b,-a,1,-m,0,-v,0,-w,-6,-v,-5,-h,-8,-j,-8,-f,-9,-c,-9,-b,-9,-8,-6,-7,1,7,a,d,5,7,6,8,5,b,8,k,5,f,6,n,4,f,3,g,2,b,1,7,1,6,-2,8,-3,9,-2,8,0,6,0,6|000000:4t,cx|000000:28,3s,0,-6,0,-7,-1,-7,-3,-8,-4,-b,-2,-9,-1,-8,-1,-9,-1,-7,0,-8,1,-7,2,-6,2,-7,1,-6,0,-6,0,-6,3,9,4,8,3,6,6,4,6,6,5,6,6,5,6,1,6,1,7,0,6,1,8,0,6,-1,6,-6,7,-7,4,-6,4,-7,3,-6,3,-7,4,-7,4,-6,3,6,0,a,0,6,0,a,0,6,0,a,0,8,1,6,2,7,1,7,0,7,1,8,1,7,1,7,0,7,0,6,0,6|000000:32,4p,0,6,4,6,6,0,6,-6,6,4,1,-6,5,-6,1,-8,1,-6|000000:2t,57,6,0,6,0,5,6,6,2,6,0,1,-7,7,4,6,1,5,-6,0,6,-6,5,-6,4,-6,2,-6,2,-9,0,-9,0,-6,-1,-5,-6,-3,-6,6,-5,6,0,6,0,6,3,7,1,6,0,6,0,7,-1,-3,6,-6,2,-6,1,-6,1,-7,1,-6,1,-7,0,-6,-2,-6,-2,-1,-6|000000:3a,6g,-7,1,-7,0,-6,2,-7,5,-a,6,-8,6,-7,5,-6,5,-6,5,-7,6,-5,6,-2,6,-5,8,-4,6,-5,8,-4,8,-3,8,-1,6,0,7,0,6,0,8,5,6,7,2,6,2,7,0,6,0,6,0,6,0,6,-2|000000:20,9l,-4,-7,-3,-6,-3,-6,-1,-9,-1,-6,0,-6,2,-8,3,-6,4,-7,5,-7,6,-5,5,7,-1,9,-1,a,0,a,0,7,0,6|000000:2z,6n,7,0,8,0,6,0,6,1,7,1,8,-1,9,-1,7,-2,7,0,6,1,6,3,4,6,3,8,3,6,6,2|000000:68,7l,2,8,1,6,-6,3,-7,4|000000:41,8m,8,-4,8,-6,6,-6,7,-5,7,-4,8,-5,6,-4,6,-6,7,-5,7,-5,8,-6,7,-5,6,-3,6,-4|000000:2a,aq,0,8,0,8,0,7,0,7,0,8,0,9,0,7,0,6,0,7,0,6,-2,6,-5,7,-5,8,1,-6,3,-6,2,-6,4,-9,1,-7,1,-7,1,-7,1,-6,0,-b,0,-7,0,-8,0,-8,-1,-8|000000:4x,cz,0,-7,0,-7,0,-8,0,-6,0,-6,0,-9,0,-7,0,-8,0,-a,0,-8,0,-8,-1,-9,-1,-9,-1,-6,-3,-a,-2,-7,-1,-8,0,-7,-1,-7,1,-6,0,-6|000000:4m,7y,0,-6|000000:45,8h,8,-6,8,-5,7,-5,8,-5,7,-4,6,-1,7,-2,7,-2,7,-2,6,-3,8,-4,7,-4,6,-4,-6,6,-9,9,-9,8,-6,5,-8,4,-6,4,-6,4,-7,4,-7,4,-7,3,-7,3,-6,2|000000:6e,6n,3,6,6,5,6,4,6,3,4,-6,2,-7,1,-6,0,-8,0,-6,-6,-1,-7,-1,-6,2,-6,7,-2,6,-1,6,3,6|000000:27,3d,0,-a,0,-6,0,-8,0,-9,0,-8,0,-7,0,-8,0,-7,-1,-8,0,-8,-2,-7,-2,-7,-1,-6,-2,-6,-1,6,1,7,1,6,2,9,0,6,-1,8,-3,a,-2,a,-1,6,-2,6,-1,a,0,8,5,-9,4,-9,1,-6,0,-a,0,-8,1,-7,0,-9,1,-9,0,-7,-2,-8,-1,-6,2,7,2,6,4,6,7,6,6,5,7,5,7,7,7,5,9,3,7,2,6,1,6,1,8,-1,7,-4,5,-7,3,-7,3,-7,1,-8,0,-9,1,-6,3,-6,3,a,1,9,1,b,0,9,0,7,0,6,0,9,0,8,0,7,-1,7,0,7,0,a,2,8,6,1,3,-7,4,-7,2,-7,3,-9,2,-6|000000:1y,2r,0,8,0,6,7,1,8,1,8,3|000000:2u,93,-3,8,-3,7,-1,-6,2,-9,3,-7,6,-4,7,0,6,2,4,6,4,6,0,7,-1,6,-6,2,-6,1,-6,1,-8,-3,-6,-4,0,-7,0,-7,6,-4,8,-3,8,-2,7,2,4,6,0,7,-3,8,-5,6,-6,4,-7,-3,-6,-4,0,-6,0,-6,2,-6,6,-2,7,0,6,7,2,6,-2,6,-7,4,-8,0,-8,-1,-6,-1,-1,-6';
+
+let img_elake = '';
+let img_eforest = '';
+let img_emountain = '';
+
 //game
-let levels = {lake: ['darkblue',4,30], forest: ['darkgreen',6,15], mountain: ['darkgray',1,40]};
+let levels = {lake: ['darkblue',4,30,img_lake], forest: ['darkgreen',6,15,img_forest], mountain: ['darkgray',1,40,img_mountain]};
 let currentlevel = null;
 let levelscene = 0;
-let currentscreen = 'map';
+let currentscreen = 'intro';
 
 let enemies = {e1: {hp: 0, sleep: [false,0], mad: [false,0], weak: [false,0]}, e2: {hp: 0, sleep: [false,0], mad: [false,0], weak: [false,0]}, e3: {hp: 0,  sleep: [false,0], mad: [false,0], weak: [false,0]}};
 let currentenemy = 'e1';
-let players = {flute: {hp: 80, songs: [1,1,1]}, drum: {hp: 150, songs: [1,1,1]}, guitar: {hp: 100, songs: [1,1,1]}};
+let players = {flute: {hp: 80, songs: [1,1,1], sprite: img_flute}, drum: {hp: 150, songs: [1,1,1], sprite: img_drum}, guitar: {hp: 100, songs: [1,1,1], sprite: img_guitar}};
 let currentplayer = null;
 let turn = 'player';
 
@@ -54,15 +68,10 @@ let playerhit = false;
 let turntimer = 0;
 let combat = false;
 let menu = null;
-let ui = {middle: document.getElementById('middle'), sheet: document.querySelectorAll('.songcol'), piano: document.getElementById('piano'), song: document.getElementById('song'), attacks: document.getElementById('attacks'), players: document.getElementById('players'), enemies: document.getElementById('enemies'), mountain: document.getElementById('mountain'), map: document.getElementById('map'), level: document.getElementById('level'), back: document.getElementById('back'), next: document.getElementById('next')};
+let ui = {background: document.getElementById('background'), imgbuf: document.getElementById('imgbuf'), middle: document.getElementById('middle'), sheet: document.querySelectorAll('.songcol'), piano: document.getElementById('piano'), song: document.getElementById('song'), attacks: document.getElementById('attacks'), players: document.getElementById('players'), enemies: document.getElementById('enemies'), mountain: document.getElementById('mountain'), map: document.getElementById('map'), level: document.getElementById('level'), back: document.getElementById('back'), next: document.getElementById('next')};
 
 //FUNCTIONS
 //initializing
-function initCanvas() {
-  canvas.width = screenX;
-  canvas.height = screenY;
-}
-
 function initAudio() {
   dry.gain.value = 0.85;
   wet.gain.value = 0.10;
@@ -77,7 +86,7 @@ function initAudio() {
   delay.connect(wet);
   wet.connect(master);
 
-  master.gain.value = 1;
+  master.gain.value = 1.5;
   master.connect(a_ctx.destination);
 }
 
@@ -88,30 +97,58 @@ function rand(min,max) {
 
 
 //canvas - UI
-function loadImage(img)
-{
-  //take img code and converts it to canvas image
+function loadImg(img) {
+  let cvx = imgbuf.getContext('2d');
+  cvx.clearRect(0,0,imgbuf.width,imgbuf.height);
+
+  for (let z of img.split('|').filter(Boolean)) {
+    let [c,p] = z.split(':');
+    let a = p.split(',').map(x=>parseInt(x,36));
+    let x = a[0];
+    let y = a[1];
+
+    cvx.strokeStyle = '#' + c;
+    cvx.beginPath();
+    cvx.moveTo(x,y);
+
+    for (let i = 2; i < a.length; i += 2) cvx.lineTo(x+=a[i],y+=a[i+1]);
+    cvx.stroke();
+  }
+
+  return imgbuf.toDataURL('image/png');
 }
 
 function draw() {
-  ctx.clearRect(0,0,screenX,screenY);
-  
+  if (currentscreen == 'intro') {
+    //draw intro background
+    let opa = 0;
+    ui.background.style.backgroundColor = 'lightgreen';
+    ui.background.style.opacity = opa;
+    ui.background.style.backgroundImage = `url("${loadImg(img_intro)}")`;
+    let fade = setInterval(() => {
+      ui.background.style.opacity = opa;
+      if (opa >= 1) clearInterval(fade);
+      else opa += 0.1;
+    },500);
+    setTimeout(() => {currentscreen = 'map'; draw()},10000);
+  }
+
   if (currentscreen == 'map') {
     //draw map background
-    ctx.fillStyle = 'orange';
-    ctx.fillRect(0,0,screenX,screenY);
+    ui.background.style.backgroundColor = 'orange';
     ui.back.hidden = true;
     ui.next.hidden = true;
     ui.level.style.display = 'none';
     ui.map.style.display = 'block';
+    ui.background.style.backgroundImage = `url("${loadImg(img_map)}")`;
   }
 
   if (currentscreen == 'town') {
     //draw map background
-    ctx.fillStyle = 'brown';
-    ctx.fillRect(0,0,screenX,screenY);
+    ui.background.style.backgroundColor = 'brown';
     ui.back.hidden = false;
     ui.map.style.display = 'none';
+    ui.background.style.backgroundImage = `url("${loadImg(img_town)}")`;
   }
   
   if (currentscreen == 'level') {
@@ -122,8 +159,8 @@ function draw() {
     ui.level.style.display = 'flex';
 
     //draw level background
-    ctx.fillStyle = currentlevel[0];
-    ctx.fillRect(0,0,screenX,screenY);
+    ui.background.style.backgroundColor = currentlevel[0];
+    ui.background.style.backgroundImage = `url("${loadImg(currentlevel[3])}")`;
 
     //combat screen
     if (combat) {
@@ -133,6 +170,8 @@ function draw() {
     }
     else {
       ui.enemies.style.display = 'none';
+      ui.players.style.display = 'none';
+      notify('Keep going or go back ?');
       ui.back.hidden = false;
       ui.next.hidden = false;
     }
@@ -152,13 +191,14 @@ function draw() {
       enemyhit = false;
     }
 
-    //check players state
+    //check players state and draw
     Object.entries(players).forEach((e,i) => {
       const pe = ui.players.children[i];
       if (e[1].hp < 1) pe.hidden = true;
       else {
         pe.hidden = false;
         pe.innerHTML = e[1].hp;
+        pe.style.backgroundImage = `url("${loadImg(e[1].sprite)}")`;
       }
     })
 
@@ -169,6 +209,9 @@ function draw() {
       else {
         ee.hidden = false;
         ee.innerHTML = e[1].hp;
+        if (currentlevel == levels.lake) ee.style.backgroundImage = `url("${loadImg(img_elake)}")`;
+        if (currentlevel == levels.forest) ee.style.backgroundImage = `url("${loadImg(img_eforest)}")`;
+        if (currentlevel == levels.mountain) ee.style.backgroundImage = `url("${loadImg(img_emountain)}")`;
       }
       if (e[1].sleep[0]) ee.style.backgroundColor = 'blue';
       else if (e[1].mad[0]) ee.style.backgroundColor = 'violet';
@@ -213,10 +256,23 @@ function draw() {
       }
     }
     else {
-      ui.players.style.display = 'flex';
+      if (combat) ui.players.style.display = 'flex';
       ui.piano.style.display = 'none';
       ui.song.style.display = 'none';
     }
+  }
+
+  if (currentscreen == 'end') {
+    //draw end background
+    let opa = 0;
+    ui.background.style.backgroundColor = 'lightblue';
+    ui.background.style.opacity = opa;
+    ui.background.style.backgroundImage = `url("${loadImg(img_end)}")`;
+    let fade = setInterval(() => {
+      ui.background.style.opacity = opa;
+      if (opa >= 1) clearInterval(fade);
+      else opa += 0.1;
+    },500);
   }
 }
 
@@ -238,22 +294,22 @@ function loadLevel(level) {
   taunt = [false,0];
 
   //spawn random num of enemies unless lvl Mountain
-  if (currentlevel === levels.mountain) {
+  if (currentlevel == levels.mountain) {
     combat = true;
     enemies.e1.hp = 300;
   }
   else {
-  if (rand(0,4) > 0) {
-    combat = true;
-    const k = Object.keys(enemies);
-    const r = rand(0,2);
-    for (let i = 0; i < 3; i++) {
-      if (i <= r) enemies[k[i]].hp = 100;
-      else enemies[k[i]].hp = 0;
+    if (rand(0,4) > 0) {
+      combat = true;
+      const k = Object.keys(enemies);
+      const r = rand(0,2);
+      for (let i = 0; i < 3; i++) {
+        if (i <= r) enemies[k[i]].hp = 100;
+        else enemies[k[i]].hp = 0;
+      }
     }
+    else combat = false;
   }
-  else combat = false;
-}
 
   draw();
 }
@@ -276,15 +332,18 @@ function next() {
   }
   else {
     notify('Level cleared');
-    setTimeout(() => {
-      ui.mountain.disabled = false;
-      currentscreen = 'map';
-      draw();
-      ui.back.hidden = true;
-      ui.next.hidden = true;
-      ui.level.style.display = 'none';
-      ui.map.style.display = 'block';
-    },2000)
+    if (currentlevel == levels.mountain) currentscreen = 'end';
+    else {
+      setTimeout(() => {
+        ui.mountain.disabled = false;
+        currentscreen = 'map';
+        ui.map.style.display = 'block';
+      },2000)
+    }
+    draw();
+    ui.back.hidden = true;
+    ui.next.hidden = true;
+    ui.level.style.display = 'none';
   }
 }
 
@@ -528,7 +587,6 @@ function enemyAttack() {
       notify('Mad enemy strikes ' + re[0]);
     }
     else {
-      console.log(strength);
       if (e.weak[0]) {
         p.hp -= strength / 2;
        notify('Player ' + playerKey + ' looses ' + (strength / 2) + ' HP');
@@ -648,6 +706,5 @@ document.addEventListener('keydown', e => {
 })
 
 //RUNTIME
-initCanvas();
 initAudio();
 draw();
