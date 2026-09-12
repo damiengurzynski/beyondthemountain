@@ -3,10 +3,18 @@ body {
   user-select: none;
   touch-action: none;
   font-family: serif;
+  image-rendering: pixelated;
 }
 
 #background {
   position: absolute;
+  font-family: serif;
+  font-size: x-large;
+  font-style: italic;
+  color: black;
+  text-shadow: 1px 1px white;
+  display: flex;
+  justify-content: center;
   height: 100vh;
   width: 100vw;
   z-index: 0;
