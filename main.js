@@ -136,11 +136,21 @@ function draw() {
       notify('Keep going or go back ?');
     }
 
-    if (playerhit) {
-      ui.players.children[Object.keys(players).indexOf(targetplayer)].style.backgroundColor = '#F71735';
-      setTimeout(() => {ui.players.children[Object.keys(players).indexOf(targetplayer)].style.backgroundColor = 'wheat'},2000);
-      playerhit = false;
-    }
+if (playerhit) {
+  const playerIndex = Object.keys(players).indexOf(targetplayer);
+
+  if (playerIndex !== -1 && ui.players.children[playerIndex]) {
+    ui.players.children[playerIndex].style.backgroundColor = '#F71735';
+
+    setTimeout(() => {
+      if (ui.players.children[playerIndex]) {
+        ui.players.children[playerIndex].style.backgroundColor = 'wheat';
+      }
+    }, 2000);
+  }
+
+  playerhit = false;
+}
 
     if (enemyhit) {
       ui.enemies.children[Object.keys(enemies).indexOf(currentenemy)].style.backgroundColor = '#F71735';
@@ -282,6 +292,7 @@ function next() {
         ui.mountain.disabled = false;
         currentscreen = 'map';
         ui.map.style.display = 'block';
+        loadImg(img_map);
       },2000)
     }
     draw();
@@ -421,6 +432,7 @@ function playerAttack() {
         players.drum.hp -= 20;
         notify('Enemy & Drum loose 20 HP');
       }
+      targetplayer = 'drum';
       enemyhit = true;
       playerhit = true;
     }
