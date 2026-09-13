@@ -1,12 +1,8 @@
-//VARIABLES
-
-//canvas
 let screenX = window.innerWidth;
 let screenY = window.innerHeight;
 
-let img_intro = '';
 let img_map = 'url(img/map.png)';
-let img_end = 'url(img/end.png';
+let img_end = 'url(img/end.png)';
 
 let img_flute = 'url(img/flute.png)';
 let img_drum = 'url(img/drum.png)';
@@ -15,8 +11,7 @@ let img_elake = 'url(img/elake.png)';
 let img_eforest = 'url(img/eforest.png)';
 let img_emountain = 'url(img/emountain.png)';
 
-//game
-let levels = {lake: ['#0C7489',4,30,img_elake], forest: ['#5B8E7D',6,15,img_eforest], mountain: ['#94778B',1,40,img_emountain]};
+let levels = {lake: ['#0C7489',5,30,img_elake], forest: ['#5B8E7D',7,15,img_eforest], mountain: ['#94778B',1,40,img_emountain]};
 let currentlevel = null;
 let levelscene = 0;
 let currentscreen = 'intro';
@@ -33,7 +28,7 @@ let songs = {flute: [
   ['Folly',[0,0,0,0,207.65,196,155.56,130.81,155.56,130.81,146.83,130.81,155.56,130.81,207.65,130.81,233.08,146.83,207.65,146.83,174.61,146.83,196,174.61,155.56,130.81]]
 ], 
 guitar: [
-  ['Spring',[92.50,116.54,174.62,155.56,233.08,207.65,174.62,138.59,116.54,0,77.78,98.00,116.54,174.62,155.56]],
+  ['Spring',[0,0,0,0,92.50,116.54,174.62,155.56,233.08,207.65,174.62,138.59,116.54,0,77.78,98.00,116.54,174.62,155.56]],
   ['Summer',[0,0,0,0,123.47,123.47,155.56,155.56,164.81,164.81,155.56,155.56,82.41,82.41,155.56,155.56,123.47,123.47,92.5,92.5,116.54,116.54,123.47,123.47]],
   ['Winter',[0,0,0,0,138.59,174.61,207.65,110.00,138.59,164.81,92.50,116.54,123.47,110.00,138.59,155.56,123.47,155.56,233.08,138.59,174.61,261.63,110.00,138.59,207.65,92.50,116.54,174.61]]
 ],
@@ -118,13 +113,6 @@ function draw() {
     ui.map.style.display = 'block';
     ui.background.style.backgroundColor = 'wheat';
     loadImg(img_map);
-  }
-
-  if (currentscreen == 'town') {
-    ui.back.hidden = false;
-    ui.map.style.display = 'none';
-    ui.background.style.backgroundColor = '#7D451B';
-    loadImg('none');
   }
   
   if (currentscreen == 'level') {

@@ -9,13 +9,13 @@ body {
 #background {
   position: absolute;
   font-family: serif;
-  font-size: x-large;
+  font-size: large;
   font-style: italic;
   color: black;
   text-shadow: 1px 1px white;
   display: flex;
   justify-content: center;
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
   z-index: 0;
   background-color: wheat;
@@ -27,7 +27,7 @@ body {
 #map {
   display: none;
   position: relative;
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
 }
 
@@ -100,7 +100,7 @@ button:disabled {
   z-index: 1;
   display: none;
   flex-direction: column;
-  height: 100vh;
+  height: 100dvh;
 }
 
 #playerside {
