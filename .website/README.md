@@ -2,6 +2,8 @@
 # See github.com/js13kGames/hello-world for supported frontmatter
 ---
 
+WARNING - There is a game breaking bug when using the EGO attack and achieving completion the first time, I will try to fix this by monday, sorry for the inconvenience !
+
 Gather your adventurers, choose your path and face the monsters with your musical talents !
 
 Discover what lies beyond the mountain
