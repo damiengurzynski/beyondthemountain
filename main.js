@@ -632,6 +632,7 @@ function playNote(inst, note) {
 }
 
 document.addEventListener('keydown', e => {
+  e.preventDefault();
   if (menu == 'song') {
     if (e.key == 'ArrowUp') {playKey(0), piano.children[0].disabled = true};
     if (e.key == 'ArrowDown') {playKey(1), piano.children[1].disabled = true};
